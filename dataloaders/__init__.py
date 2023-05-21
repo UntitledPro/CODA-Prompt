@@ -1,5 +1,5 @@
 from __future__ import absolute_import
 
-from .dataloader import iCIFAR100, iCIFAR10, iIMAGENET_R
+from .dataloader import ILCIFAR100, ILCIFAR10, ILImageNetR
 
-__all__ = ('iCIFAR100','iCIFAR10','iIMAGENET_R')
+__all__ = ('ILCIFAR100','ILCIFAR10','ILImageNetR')

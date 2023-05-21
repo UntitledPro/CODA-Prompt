@@ -1,13 +1,12 @@
 # bash experiments/cifar-100.sh
 # experiment settings
 DATASET=cifar-100
-N_CLASS=200
 
 # save directory
 OUTDIR=outputs/${DATASET}/10-task
 
 # hard coded inputs
-GPUID='0 1 2 3'
+GPUID='0 1 2 7'
 CONFIG=configs/cifar-100_prompt.yaml
 REPEAT=1
 OVERWRITE=0

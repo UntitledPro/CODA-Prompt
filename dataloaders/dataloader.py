@@ -5,19 +5,17 @@ import os.path
 import numpy as np
 import sys
 import pickle
-import torch
 import torch.utils.data as data
 from .utils import download_url, check_integrity
-import random
-import torchvision.datasets as datasets
 import yaml
 
-class iDataset(data.Dataset):
-    
+
+class ILDataset(data.Dataset):
+
     def __init__(self, root,
-                train=True, transform=None,
-                download_flag=False, lab=True, swap_dset = None, 
-                tasks=None, seed=-1, rand_split=False, validation=False, kfolds=5):
+                 train=True, transform=None,
+                 download_flag=False, lab=True, swap_dset=None,
+                 tasks=None, seed=-1, rand_split=False, validation=False, kfolds=5):
 
         # process rest of args
         self.root = os.path.expanduser(root)
@@ -48,7 +46,7 @@ class iDataset(data.Dataset):
 
         # if validation
         if self.validation:
-            
+
             # shuffle
             state = np.random.get_state()
             np.random.seed(self.seed)
@@ -60,45 +58,46 @@ class iDataset(data.Dataset):
             # sample
             n_data = len(self.targets)
             if self.train:
-                self.data = self.data[:int(0.8*n_data)]
-                self.targets = self.targets[:int(0.8*n_data)]
+                self.data = self.data[:int(0.8 * n_data)]
+                self.targets = self.targets[:int(0.8 * n_data)]
             else:
-                self.data = self.data[int(0.8*n_data):]
-                self.targets = self.targets[int(0.8*n_data):]
+                self.data = self.data[int(0.8 * n_data):]
+                self.targets = self.targets[int(0.8 * n_data):]
 
             # train set
             if self.train:
-                self.data = self.data[:int(0.8*n_data)]
-                self.targets = self.targets[:int(0.8*n_data)]
+                self.data = self.data[:int(0.8 * n_data)]
+                self.targets = self.targets[:int(0.8 * n_data)]
                 self.archive = []
-                domain_i = 0
                 for task in self.tasks:
                     if True:
                         locs = np.isin(self.targets, task).nonzero()[0]
-                        self.archive.append((self.data[locs].copy(), self.targets[locs].copy()))
+                        self.archive.append(
+                            (self.data[locs].copy(), self.targets[locs].copy()))
 
             # val set
             else:
                 self.archive = []
-                domain_i = 0
                 for task in self.tasks:
                     if True:
                         locs = np.isin(self.targets, task).nonzero()[0]
-                        self.archive.append((self.data[locs].copy(), self.targets[locs].copy()))
+                        self.archive.append(
+                            (self.data[locs].copy(), self.targets[locs].copy()))
 
         # else
         else:
             self.archive = []
-            domain_i = 0
             for task in self.tasks:
                 if True:
                     locs = np.isin(self.targets, task).nonzero()[0]
-                    self.archive.append((self.data[locs].copy(), self.targets[locs].copy()))
+                    self.archive.append(
+                        (self.data[locs].copy(), self.targets[locs].copy()))
 
         if self.train:
-            self.coreset = (np.zeros(0, dtype=self.data.dtype), np.zeros(0, dtype=self.targets.dtype))
+            self.coreset = (np.zeros(0, dtype=self.data.dtype),
+                            np.zeros(0, dtype=self.targets.dtype))
 
-    def __getitem__(self, index, simple = False):
+    def __getitem__(self, index, simple=False):
         """
         Args:
             index (int): Index
@@ -117,12 +116,14 @@ class iDataset(data.Dataset):
         return img, self.class_mapping[target], self.t
 
     def load_dataset(self, t, train=True):
-        
+
         if train:
-            self.data, self.targets = self.archive[t] 
+            self.data, self.targets = self.archive[t]
         else:
-            self.data    = np.concatenate([self.archive[s][0] for s in range(t+1)], axis=0)
-            self.targets = np.concatenate([self.archive[s][1] for s in range(t+1)], axis=0)
+            self.data = np.concatenate(
+                [self.archive[s][0] for s in range(t + 1)], axis=0)
+            self.targets = np.concatenate(
+                [self.archive[s][1] for s in range(t + 1)], axis=0)
         self.t = t
 
     def append_coreset(self, only=False, interp=False):
@@ -133,31 +134,36 @@ class iDataset(data.Dataset):
             else:
                 len_data = len(self.data)
                 sample_ind = np.random.choice(len_core, len_data)
-                self.data = np.concatenate([self.data, self.coreset[0][sample_ind]], axis=0)
-                self.targets = np.concatenate([self.targets, self.coreset[1][sample_ind]], axis=0)
+                self.data = np.concatenate(
+                    [self.data, self.coreset[0][sample_ind]], axis=0)
+                self.targets = np.concatenate(
+                    [self.targets, self.coreset[1][sample_ind]], axis=0)
 
     def update_coreset(self, coreset_size, seen):
         num_data_per = coreset_size // len(seen)
         remainder = coreset_size % len(seen)
         data = []
         targets = []
-        
+
         # random coreset management; latest classes take memory remainder
         # coreset selection without affecting RNG state
         state = np.random.get_state()
         np.random.seed(self.seed)
         for k in reversed(seen):
-            mapped_targets = [self.class_mapping[self.targets[i]] for i in range(len(self.targets))]
+            mapped_targets = [self.class_mapping[self.targets[i]]
+                              for i in range(len(self.targets))]
             locs = (mapped_targets == k).nonzero()[0]
             if (remainder > 0) and (len(locs) > num_data_per):
                 num_data_k = num_data_per + 1
                 remainder -= 1
             else:
                 num_data_k = min(len(locs), num_data_per)
-            locs_chosen = locs[np.random.choice(len(locs), num_data_k, replace=False)]
+            locs_chosen = locs[np.random.choice(
+                len(locs), num_data_k, replace=False)]
             data.append([self.data[loc] for loc in locs_chosen])
             targets.append([self.targets[loc] for loc in locs_chosen])
-        self.coreset = (np.concatenate(list(reversed(data)), axis=0), np.concatenate(list(reversed(targets)), axis=0))
+        self.coreset = (np.concatenate(list(reversed(data)), axis=0),
+                        np.concatenate(list(reversed(targets)), axis=0))
         np.random.set_state(state)
 
     def load(self):
@@ -173,10 +179,12 @@ class iDataset(data.Dataset):
         fmt_str += '    Split: {}\n'.format(tmp)
         fmt_str += '    Root Location: {}\n'.format(self.root)
         tmp = '    Transforms (if any): '
-        fmt_str += '{0}{1}\n'.format(tmp, self.transform.__repr__().replace('\n', '\n' + ' ' * len(tmp)))
+        fmt_str += '{0}{1}\n'.format(
+            tmp, self.transform.__repr__().replace('\n', '\n' + ' ' * len(tmp)))
         return fmt_str
 
-class iCIFAR10(iDataset):
+
+class ILCIFAR10(ILDataset):
     """`CIFAR10 <https://www.cs.toronto.edu/~kriz/cifar.html>`_ Dataset.
     This is a subclass of the iDataset Dataset.
     """
@@ -200,8 +208,8 @@ class iCIFAR10(iDataset):
         'key': 'label_names',
         'md5': '5ff9c542aee3614f3951f8cda6e48888',
     }
-    im_size=32
-    nch=3
+    im_size = 32
+    nch = 3
 
     def load(self):
 
@@ -237,7 +245,7 @@ class iCIFAR10(iDataset):
                     self.targets.extend(entry['fine_labels'])
                 if 'coarse_labels' in entry:
                     self.course_targets.extend(entry['coarse_labels'])
-                
+
         self.data = np.vstack(self.data).reshape(-1, 3, 32, 32)
         self.data = self.data.transpose((0, 2, 3, 1))  # convert to HWC
         self._load_meta()
@@ -266,7 +274,8 @@ class iCIFAR10(iDataset):
             else:
                 data = pickle.load(infile, encoding='latin1')
             self.classes = data[self.meta['key']]
-        self.class_to_idx = {_class: i for i, _class in enumerate(self.classes)}
+        self.class_to_idx = {_class: i for i,
+                             _class in enumerate(self.classes)}
 
     def _check_integrity(self):
         root = self.root
@@ -277,7 +286,8 @@ class iCIFAR10(iDataset):
                 return False
         return True
 
-class iCIFAR100(iCIFAR10):
+
+class ILCIFAR100(ILCIFAR10):
     """`CIFAR100 <https://www.cs.toronto.edu/~kriz/cifar.html>`_ Dataset.
     This is a subclass of the iCIFAR10 Dataset.
     """
@@ -297,25 +307,29 @@ class iCIFAR100(iCIFAR10):
         'key': 'fine_label_names',
         'md5': '7973b15100ade9c7d40fb424638fde48',
     }
-    im_size=32
-    nch=3
+    im_size = 32
+    nch = 3
 
-class iIMAGENET_R(iDataset):
-    
+
+class ILImageNetR(ILDataset):
+
     base_folder = 'imagenet-r'
-    im_size=224
-    nch=3
+    im_size = 224
+    nch = 3
+
     def load(self):
 
         # load splits from config file
         if self.train or self.validation:
-            data_config = yaml.load(open('dataloaders/splits/imagenet-r_train.yaml', 'r'), Loader=yaml.Loader)
+            data_config = yaml.load(
+                open('dataloaders/splits/imagenet-r_train.yaml', 'r'), Loader=yaml.Loader)
         else:
-            data_config = yaml.load(open('dataloaders/splits/imagenet-r_test.yaml', 'r'), Loader=yaml.Loader)
+            data_config = yaml.load(
+                open('dataloaders/splits/imagenet-r_test.yaml', 'r'), Loader=yaml.Loader)
         self.data = data_config['data']
         self.targets = data_config['targets']
 
-    def __getitem__(self, index, simple = False):
+    def __getitem__(self, index, simple=False):
         """
         Args:
             index (int): Index
@@ -334,16 +348,6 @@ class iIMAGENET_R(iDataset):
 
         return img, self.class_mapping[target], self.t
 
-    def parse_archives(self) -> None:
-        if not check_integrity(os.path.join(self.root, META_FILE)):
-            parse_devkit_archive(self.root)
-
-        if not os.path.isdir(self.split_folder):
-            if self.split == 'train':
-                parse_train_archive(self.root)
-            elif self.split == 'val':
-                parse_val_archive(self.root)
-
     @property
     def split_folder(self) -> str:
         return os.path.join(self.root, self.split)
@@ -351,13 +355,14 @@ class iIMAGENET_R(iDataset):
     def extra_repr(self) -> str:
         return "Split: {split}".format(**self.__dict__)
 
+
 def jpg_image_to_array(image_path):
     """
-    Loads JPEG image into 3D Numpy array of shape 
+    Loads JPEG image into 3D Numpy array of shape
     (width, height, channels)
     """
-    with Image.open(image_path) as image:      
+    with Image.open(image_path) as image:
         image = image.convert('RGB')
         im_arr = np.fromstring(image.tobytes(), dtype=np.uint8)
-        im_arr = im_arr.reshape((image.size[1], image.size[0], 3))                                   
+        im_arr = im_arr.reshape((image.size[1], image.size[0], 3))
     return im_arr
