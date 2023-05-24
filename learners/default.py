@@ -65,6 +65,7 @@ class NormalNN(nn.Module):
 
         # try to load model
         need_train = True
+        batch_time = None
         if not self.overwrite:
             try:
                 self.load_model(model_save_dir)
@@ -77,7 +78,6 @@ class NormalNN(nn.Module):
             self.log('Optimizer is reset!')
             self.init_optimizer()
         if need_train:
-
             # data weighting
             self.data_weighting(train_dataset)
             losses = AverageMeter()
@@ -136,10 +136,14 @@ class NormalNN(nn.Module):
             train_dataset.update_coreset(
                 self.memory_size, np.arange(self.last_valid_out_dim))
 
-        try:
+        if batch_time:
             return batch_time.avg
-        except Exception:
+        else:
             return None
+        # try:
+        #     return batch_time.avg
+        # except Exception:
+        #     return None
 
     def criterion(self, logits, targets, data_weights):
         loss_supervised = (self.criterion_fn(

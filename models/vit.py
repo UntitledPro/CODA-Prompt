@@ -10,6 +10,7 @@ from timm.models.vision_transformer import PatchEmbed
 from timm.models.layers import trunc_normal_, DropPath
 from timm.models.helpers import adapt_input_conv
 from timm.models.vision_transformer import resize_pos_embed
+from typing import Union
 
 
 class Mlp(nn.Module):
@@ -121,7 +122,7 @@ class VisionTransformer(nn.Module):
 
     def __init__(self, img_size=224, patch_size=16, in_chans=3, num_classes=1000, embed_dim=768, depth=12,
                  num_heads=12, mlp_ratio=4., qkv_bias=True, qk_scale=None, representation_size=None,
-                 drop_rate=0., attn_drop_rate=0., drop_path_rate=0., norm_layer=None,
+                 drop_rate=0., attn_drop_rate=0., drop_path_rate=0., norm_layer: Union[nn.LayerNorm, None] = None,
                  ckpt_layer=0):
         """
         Args:
