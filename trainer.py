@@ -1,27 +1,29 @@
 import os
 import numpy as np
 import random
+from argparse import Namespace
 from collections import OrderedDict
 import dataloaders
-from dataloaders.utils import *
 from torch.utils.data import DataLoader
 import learners
+from typing import Dict, List, Any
 
 
 class Trainer:
-
-    def __init__(self, args, seed, metric_keys, save_keys):
+    def __init__(self, args: Namespace, seed: int,
+                 metric_keys: List[str],
+                 save_keys: List[str]) -> None:
 
         # process inputs
-        self.seed = seed
-        self.metric_keys = metric_keys
-        self.save_keys = save_keys
-        self.log_dir = args.log_dir
-        self.batch_size = args.batch_size
-        self.workers = args.workers
+        self.seed: int = seed
+        self.metric_keys: List[str] = metric_keys
+        self.save_keys: List[str] = save_keys
+        self.log_dir: str = args.log_dir
+        self.batch_size: int = args.batch_size
+        self.workers: int = args.workers
 
         # model load directory
-        self.model_top_dir = args.log_dir
+        self.model_top_dir: str = args.log_dir
 
         # select dataset
         self.grayscale_vis = False
@@ -29,15 +31,15 @@ class Trainer:
         if args.dataset == 'CIFAR10':
             Dataset = dataloaders.ILCIFAR10
             num_classes = 10
-            self.dataset_size = [32, 32, 3]
+            self.dataset_size: list[int] = [32, 32, 3]
         elif args.dataset == 'CIFAR100':
             Dataset = dataloaders.ILCIFAR100
             num_classes = 100
-            self.dataset_size = [32, 32, 3]
+            self.dataset_size: list[int] = [32, 32, 3]
         elif args.dataset == 'ImageNet_R':
             Dataset = dataloaders.ILImageNetR
             num_classes = 200
-            self.dataset_size = [224, 224, 3]
+            self.dataset_size: list[int] = [224, 224, 3]
             self.top_k = 1
         else:
             raise ValueError('Dataset not implemented!')
@@ -48,8 +50,8 @@ class Trainer:
             args.first_split_size = num_classes
 
         # load tasks
-        class_order = np.arange(num_classes).tolist()
-        class_order_logits = np.arange(num_classes).tolist()
+        class_order: List[int] = np.arange(num_classes).tolist()
+        class_order_logits: List[int] = np.arange(num_classes).tolist()
         if self.seed > 0 and args.rand_split:
             print('=============================================')
             print('Shuffling....')
@@ -58,16 +60,18 @@ class Trainer:
             random.shuffle(class_order)
             print('post-shuffle:' + str(class_order))
             print('=============================================')
-        self.tasks = []
-        self.tasks_logits = []
+        self.tasks: List[List[int]] = []
+        self.tasks_logits: List[List[int]] = []
+        # p: the number of seen classes
         p = 0
         while p < num_classes and (args.max_task == -1 or len(self.tasks) < args.max_task):
-            inc = args.other_split_size if p > 0 else args.first_split_size
+            inc: int = args.other_split_size if p > 0 else args.first_split_size
             self.tasks.append(class_order[p:p + inc])
             self.tasks_logits.append(class_order_logits[p:p + inc])
             p += inc
-        self.num_tasks = len(self.tasks)
-        self.task_names = [str(i + 1) for i in range(self.num_tasks)]
+        self.num_tasks: int = len(self.tasks)
+        self.task_names: List[str] = [str(i + 1)
+                                      for i in range(self.num_tasks)]
 
         # number of tasks to perform
         if args.max_task > 0:
@@ -92,33 +96,34 @@ class Trainer:
                                     seed=self.seed, rand_split=args.rand_split, validation=args.validation)
 
         # for oracle
-        self.oracle_flag = args.oracle_flag
+        self.oracle_flag: bool = args.oracle_flag
         self.add_dim = 0
 
         # Prepare the self.learner (model)
-        self.learner_config = {'num_classes': num_classes,
-                               'lr': args.lr,
-                               'debug_mode': args.debug_mode == 1,
-                               'momentum': args.momentum,
-                               'weight_decay': args.weight_decay,
-                               'schedule': args.schedule,
-                               'schedule_type': args.schedule_type,
-                               'model_type': args.model_type,
-                               'model_name': args.model_name,
-                               'optimizer': args.optimizer,
-                               'gpuid': args.gpuid,
-                               'memory': args.memory,
-                               'temp': args.temp,
-                               'out_dim': num_classes,
-                               'overwrite': args.overwrite == 1,
-                               'DW': args.DW,
-                               'batch_size': args.batch_size,
-                               'upper_bound_flag': args.upper_bound_flag,
-                               'tasks': self.tasks_logits,
-                               'top_k': self.top_k,
-                               'prompt_param': [self.num_tasks, args.prompt_param]
-                               }
-        self.learner_type, self.learner_name = args.learner_type, args.learner_name
+        self.learner_config: Dict[str, Any] = {'num_classes': num_classes,
+                                               'lr': args.lr,
+                                               'debug_mode': args.debug_mode == 1,
+                                               'momentum': args.momentum,
+                                               'weight_decay': args.weight_decay,
+                                               'schedule': args.schedule,
+                                               'schedule_type': args.schedule_type,
+                                               'model_type': args.model_type,
+                                               'model_name': args.model_name,
+                                               'optimizer': args.optimizer,
+                                               'gpuid': args.gpuid,
+                                               'memory': args.memory,
+                                               'temp': args.temp,
+                                               'out_dim': num_classes,
+                                               'overwrite': args.overwrite == 1,
+                                               'DW': args.DW,
+                                               'batch_size': args.batch_size,
+                                               'upper_bound_flag': args.upper_bound_flag,
+                                               'tasks': self.tasks_logits,
+                                               'top_k': self.top_k,
+                                               'prompt_param': [self.num_tasks, args.prompt_param]
+                                               }
+        self.learner_type: str = args.learner_type
+        self.learner_name: str = args.learner_name
         self.learner = learners.__dict__[self.learner_type].__dict__[
             self.learner_name](self.learner_config)
 
@@ -197,7 +202,7 @@ class Trainer:
             self.test_dataset.load_dataset(i, train=False)
             test_loader = DataLoader(self.test_dataset, batch_size=self.batch_size,
                                      shuffle=False, drop_last=False, num_workers=self.workers)
-            model_save_dir = self.model_top_dir + '/models/repeat-' + \
+            model_save_dir: str = self.model_top_dir + '/models/repeat-' + \
                 str(self.seed + 1) + '/task-' + self.task_names[i] + '/'
             if not os.path.exists(model_save_dir):
                 os.makedirs(model_save_dir)
@@ -234,7 +239,7 @@ class Trainer:
 
         # Calculate average performance across self.tasks
         # Customize this part for a different performance metric
-        avg_acc_history = [0] * self.max_task
+        avg_acc_history: List[float] = [0.] * self.max_task
         for i in range(self.max_task):
             train_name = self.task_names[i]
             cls_acc_sum = 0

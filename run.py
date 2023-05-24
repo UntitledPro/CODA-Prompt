@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import os
 import sys
 import argparse
+from argparse import ArgumentParser, Namespace
 import torch
 import torch.backends.cuda
 import torch.backends.cudnn
@@ -12,6 +13,18 @@ import numpy as np
 import yaml
 import random
 from trainer import Trainer
+from typing import Dict, Any, List, Union, Sequence
+
+
+def set_random_seed(seed=1) -> None:
+    """Set random seed and cuda backen for reproducibility."""
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 
 def create_args():
@@ -47,7 +60,9 @@ def create_args():
     parser.add_argument('--DW', default=False,
                         action='store_true', help='dataset balancing')
     parser.add_argument('--prompt_param', nargs="+", type=float, default=[1, 1, 1],
-                        help="e prompt pool size, e prompt length, g prompt length")
+                        help="e prompt pool size; \
+                            e prompt length, g prompt length; \
+                                strength of ortho penalty")
 
     # Config Arg
     parser.add_argument('--config', type=str, default="configs/config.yaml",
@@ -56,10 +71,10 @@ def create_args():
     return parser
 
 
-def get_args(argv):
-    parser = create_args()
-    args = parser.parse_args(argv)
-    config = yaml.load(open(args.config, 'r'), Loader=yaml.Loader)
+def get_args(argv) -> Namespace:
+    parser: ArgumentParser = create_args()
+    args: Namespace = parser.parse_args(argv)
+    config: Dict = yaml.load(open(args.config, 'r'), Loader=yaml.Loader)
     config.update(vars(args))
     return argparse.Namespace(**config)
 
@@ -67,20 +82,20 @@ def get_args(argv):
 
 
 class Logger(object):
-    def __init__(self, name):
+    def __init__(self, name) -> None:
         self.terminal = sys.stdout
         self.log = open(name, "a")
 
-    def write(self, message):
+    def write(self, message) -> None:
         self.terminal.write(message)
         self.log.write(message)
 
-    def flush(self):
+    def flush(self) -> None:
         self.log.flush()
 
 
 if __name__ == '__main__':
-    args = get_args(sys.argv[1:])
+    args: Namespace = get_args(sys.argv[1:])
 
     # determinstic backend
     torch.backends.cudnn.deterministic = True
@@ -95,7 +110,7 @@ if __name__ == '__main__':
     with open(args.log_dir + '/args.yaml', 'w') as yaml_file:
         yaml.dump(vars(args), yaml_file, default_flow_style=False)
 
-    metric_keys = ['acc', 'time']
+    metric_keys = ['acc','time',]
     save_keys = ['global', 'pt', 'pt-local']
     global_only = ['time']
     avg_metrics = {}
@@ -112,15 +127,15 @@ if __name__ == '__main__':
             for mkey in metric_keys:
                 for skey in save_keys:
                     if (not (mkey in global_only)) or (skey == 'global'):
-                        save_file = args.log_dir + '/results-' + mkey + '/' + skey + '.yaml'
+                        save_file: str = args.log_dir + '/results-' + mkey + '/' + skey + '.yaml'
                         if os.path.exists(save_file):
                             with open(save_file, 'r') as yaml_file:
-                                yaml_result = yaml.safe_load(yaml_file)
+                                yaml_result: Dict = yaml.safe_load(yaml_file)
                                 avg_metrics[mkey][skey] = np.asarray(
                                     yaml_result['history'])
 
             # next repeat needed
-            start_r = avg_metrics[metric_keys[0]][save_keys[0]].shape[-1]
+            start_r: int = avg_metrics[metric_keys[0]][save_keys[0]].shape[-1]
 
             # extend if more repeats left
             if start_r < args.repeat:
@@ -144,11 +159,8 @@ if __name__ == '__main__':
         print('************************************')
 
         # set random seeds
-        seed = r
-        random.seed(seed)
-        np.random.seed(seed)
-        torch.manual_seed(seed)
-        torch.cuda.manual_seed(seed)
+        seed: int = r
+        set_random_seed(seed)
 
         # set up a trainer
         trainer = Trainer(args, seed, metric_keys, save_keys)
@@ -157,7 +169,7 @@ if __name__ == '__main__':
         max_task = trainer.max_task
         if r == 0:
             for mkey in metric_keys:
-                avg_metrics[mkey]['global'] = np.zeros((max_task, args.repeat))
+                avg_metrics[mkey]['global'] = np.zeros((max_task,args.repeat))
                 if (not (mkey in global_only)):
                     avg_metrics[mkey]['pt'] = np.zeros(
                         (max_task, max_task, args.repeat))
@@ -172,9 +184,8 @@ if __name__ == '__main__':
 
         # save results
         for mkey in metric_keys:
-            m_dir = args.log_dir + '/results-' + mkey + '/'
-            if not os.path.exists(m_dir):
-                os.makedirs(m_dir)
+            m_dir = args.log_dir+'/results-'+mkey+'/'
+            if not os.path.exists(m_dir): os.makedirs(m_dir)
             for skey in save_keys:
                 if (not (mkey in global_only)) or (skey == 'global'):
                     save_file = m_dir + skey + '.yaml'

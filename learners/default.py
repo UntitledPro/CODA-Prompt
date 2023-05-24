@@ -1,7 +1,9 @@
 from __future__ import print_function
+from typing import Callable, Any, Dict, List, Union, Sequence
 import torch
 import torch.nn as nn
 import models
+from models.zoo import ResNetZoo
 from utils.metric import accuracy, AverageMeter, Timer
 import numpy as np
 from utils.schedulers import CosineSchedule
@@ -15,9 +17,9 @@ class NormalNN(nn.Module):
     def __init__(self, learner_config):
 
         super(NormalNN, self).__init__()
-        self.log = print
-        self.config = learner_config
-        self.out_dim = learner_config['out_dim']
+        self.log: Callable[..., Any] = print
+        self.config: Dict[str, Any] = learner_config
+        self.out_dim: int = learner_config['out_dim']
         self.model = self.create_model()
         self.reset_optimizer = True
         self.overwrite = learner_config['overwrite']
@@ -85,7 +87,7 @@ class NormalNN(nn.Module):
             batch_time = AverageMeter()
             batch_timer = Timer()
             for epoch in range(self.config['schedule'][-1]):
-                self.epoch = epoch
+                self.epoch: int = epoch
 
                 if epoch > 0:
                     self.scheduler.step()
@@ -271,8 +273,8 @@ class NormalNN(nn.Module):
             self.scheduler = torch.optim.lr_scheduler.MultiStepLR(
                 self.optimizer, milestones=self.schedule, gamma=0.1)
 
-    def create_model(self):
-        cfg = self.config
+    def create_model(self) -> ResNetZoo:
+        cfg: Dict[str, Any] = self.config
 
         # Define the backbone (MLP, LeNet, VGG, ResNet ... etc) of model
         model = models.__dict__[cfg['model_type']].__dict__[
@@ -316,7 +318,7 @@ class NormalNN(nn.Module):
         self.criterion_fn = self.criterion_fn.cuda()
         # Multi-GPU
         if len(self.config['gpuid']) > 1:
-            self.model = torch.nn.DataParallel(
+            self.model = torch.nn.parallel.DataParallel(
                 self.model, device_ids=self.config['gpuid'], output_device=self.config['gpuid'][0])
         return self
 

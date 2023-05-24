@@ -4,12 +4,14 @@
 '''
 
 import torch
+from torch import Tensor
 import torch.nn as nn
 from functools import partial
 from timm.models.vision_transformer import PatchEmbed
 from timm.models.layers import trunc_normal_, DropPath
 from timm.models.helpers import adapt_input_conv
 from timm.models.vision_transformer import resize_pos_embed
+import torch.jit
 from typing import Union
 
 
@@ -180,7 +182,7 @@ class VisionTransformer(nn.Module):
             nn.init.constant_(m.bias, 0)
             nn.init.constant_(m.weight, 1.0)
 
-    @torch.jit.ignore
+    @torch.jit.ignore()
     def no_weight_decay(self):
         return {'pos_embed', 'cls_token'}
 
@@ -195,7 +197,7 @@ class VisionTransformer(nn.Module):
         x = x + self.pos_embed[:, :x.size(1), :]
         x = self.pos_drop(x)
 
-        prompt_loss = torch.zeros((1,), requires_grad=True).cuda()
+        prompt_loss: Tensor = torch.zeros((1,), requires_grad=True).cuda()
         for i, blk in enumerate(self.blocks):
 
             if prompt is not None:

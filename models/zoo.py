@@ -1,7 +1,10 @@
+from ctypes import Union
 import torch
+from torch.nn.parameter import Parameter
 import torch.nn as nn
 from .vit import VisionTransformer
-
+from typing import Dict, List, Union, Any
+from torch import Tensor
 # Our method!
 
 
@@ -16,41 +19,48 @@ class CodaPrompt(nn.Module):
 
         # e prompt init
         for e in self.e_layers:
-            e_l = self.e_p_length
-            p = tensor_prompt(self.e_pool_size, e_l, emb_d, ortho=True)
-            k = tensor_prompt(self.e_pool_size, self.key_d, ortho=True)
-            a = tensor_prompt(self.e_pool_size, self.key_d, ortho=True)
+            e_l: int = self.e_p_length
+            p: Parameter = tensor_prompt(
+                self.e_pool_size, e_l, emb_d, ortho=True)
+            k: Parameter = tensor_prompt(
+                self.e_pool_size, self.key_d, ortho=True)
+            a: Parameter = tensor_prompt(
+                self.e_pool_size, self.key_d, ortho=True)
             setattr(self, f'e_p_{e}', p)
             setattr(self, f'e_k_{e}', k)
             setattr(self, f'e_a_{e}', a)
 
-    def _init_smart(self, emb_d, prompt_param):
+    def _init_smart(self, emb_d, prompt_param) -> None:
 
         # prompt basic param
+        # number of prompt groups in the pool
         self.e_pool_size = int(prompt_param[0])
+        # number of prompts in each prompt group
         self.e_p_length = int(prompt_param[1])
-        self.e_layers = [0, 1, 2, 3, 4]
+        self.e_layers: list[int] = [0, 1, 2, 3, 4]
 
-        # strenth of ortho penalty
-        self.ortho_mu = prompt_param[2]
+        # strength of ortho penalty
+        self.ortho_mu: float = prompt_param[2]
 
-    def process_task_count(self):
+    def process_task_count(self) -> None:
         self.task_count += 1
 
-    def forward(self, x_querry, l_jjj, x_block, train=False, task_id=None):
+    def forward(self, x_querry: Tensor, idx: int,
+                x_block: Tensor, train=False, task_id=None):
 
         # e prompts
         e_valid = False
-        if l_jjj in self.e_layers:
+        if idx in self.e_layers:
             e_valid = True
             B, C = x_querry.shape
 
-            K = getattr(self, f'e_k_{l_jjj}')
-            A = getattr(self, f'e_a_{l_jjj}')
-            p = getattr(self, f'e_p_{l_jjj}')
-            pt = int(self.e_pool_size / (self.n_tasks))
-            s = int(self.task_count * pt)
-            f = int((self.task_count + 1) * pt)
+            K: Parameter = getattr(self, f'e_k_{idx}')
+            A: Parameter = getattr(self, f'e_a_{idx}')
+            p: Parameter = getattr(self, f'e_p_{idx}')
+            # the number of prompts per task
+            nb_pt = int(self.e_pool_size / (self.n_tasks))
+            s = int(self.task_count * nb_pt)
+            f = int((self.task_count + 1) * nb_pt)
 
             # freeze/control past tasks
             if train:
@@ -103,7 +113,7 @@ class CodaPrompt(nn.Module):
         return p_return, loss, x_block
 
 
-def ortho_penalty(t):
+def ortho_penalty(t: Tensor) -> Tensor:
     return ((t @ t.T - torch.eye(t.shape[0]).cuda())**2).mean() * 1e-6
 
 # @article{wang2022dualprompt,
@@ -152,15 +162,15 @@ class DualPrompt(nn.Module):
     def process_task_count(self):
         self.task_count += 1
 
-    def forward(self, x_querry, l_ggg, x_block, train=False, task_id=None):
-
+    def forward(self, x_querry, layer_idx, x_block, train=False, task_id=None):
         # e prompts
         e_valid = False
-        if l_ggg in self.e_layers:
+        if layer_idx in self.e_layers:
             e_valid = True
             B, C = x_querry.shape
-            K = getattr(self, f'e_k_{l_ggg}')  # 0 based indexing here
-            p = getattr(self, f'e_p_{l_ggg}')  # 0 based indexing here
+            # [pool_size, p_length, emb_d]
+            K = getattr(self, f'e_k_{layer_idx}')  # 0 based indexing here
+            p = getattr(self, f'e_p_{layer_idx}')  # 0 based indexing here
 
             # cosine similarity to match keys/querries
             n_K = nn.functional.normalize(K, dim=1)
@@ -194,10 +204,10 @@ class DualPrompt(nn.Module):
 
         # g prompts
         g_valid = False
-        if l_ggg in self.g_layers:
+        if layer_idx in self.g_layers:
             g_valid = True
             j = int(self.g_p_length / 2)
-            p = getattr(self, f'g_p_{l_ggg}')  # 0 based indexing here
+            p = getattr(self, f'g_p_{layer_idx}')  # 0 based indexing here
             P_ = p.expand(len(x_querry), -1, -1)
             Gk = P_[:, :j, :]
             Gv = P_[:, j:, :]
@@ -254,11 +264,13 @@ class L2P(DualPrompt):
 # note - ortho init has not been found to help l2p/dual prompt
 
 
-def tensor_prompt(a, b, c=None, ortho=False):
+def tensor_prompt(a, b, c=None, ortho=False) -> Parameter:
     if c is None:
-        p = torch.nn.Parameter(torch.FloatTensor(a, b), requires_grad=True)
+        p = torch.nn.parameter.Parameter(
+            torch.FloatTensor(a, b), requires_grad=True)
     else:
-        p = torch.nn.Parameter(torch.FloatTensor(a, b, c), requires_grad=True)
+        p = torch.nn.parameter.Parameter(
+            torch.FloatTensor(a, b, c), requires_grad=True)
     if ortho:
         nn.init.orthogonal_(p)
     else:
@@ -267,25 +279,25 @@ def tensor_prompt(a, b, c=None, ortho=False):
 
 
 class ResNetZoo(nn.Module):
-    def __init__(self, num_classes=10, pt=False, prompt_flag=False, prompt_param=None):
+    def __init__(self, num_classes=10, pt=False, prompt_flag=False,
+                 prompt_param: List[float] = []):
         super(ResNetZoo, self).__init__()
 
         # get last layer
         self.last = nn.Linear(512, num_classes)
-        self.prompt_flag = prompt_flag
+        self.prompt_flag: bool = prompt_flag
         self.task_id = None
 
         # get feature encoder
-        if pt:
-            zoo_model = VisionTransformer(img_size=224, patch_size=16, embed_dim=768, depth=12,
-                                          num_heads=12, ckpt_layer=0,
-                                          drop_path_rate=0
-                                          )
-            from timm.models import vit_base_patch16_224
-            load_dict = vit_base_patch16_224(pretrained=True).state_dict()
-            del load_dict['head.weight']
-            del load_dict['head.bias']
-            zoo_model.load_state_dict(load_dict)
+        zoo_model = VisionTransformer(img_size=224, patch_size=16, embed_dim=768, depth=12,
+                                      num_heads=12, ckpt_layer=0,
+                                      drop_path_rate=0
+                                      )
+        from timm.models import vit_base_patch16_224
+        load_dict = vit_base_patch16_224(pretrained=True).state_dict()
+        del load_dict['head.weight']
+        del load_dict['head.bias']
+        zoo_model.load_state_dict(load_dict)
 
         # classifier
         self.last = nn.Linear(768, num_classes)
@@ -301,11 +313,11 @@ class ResNetZoo(nn.Module):
             self.prompt = None
 
         # feature encoder changes if transformer vs resnet
-        self.feat = zoo_model
+        self.feat: VisionTransformer = zoo_model
 
     # pen: get penultimate features
     def forward(self, x, pen=False, train=False):
-
+        prompt_loss = 0
         if self.prompt is not None:
             with torch.no_grad():
                 q, _ = self.feat(x)

@@ -13,7 +13,7 @@
             "justMyCode": true,
             "args": [
                 "--config", "configs/cifar-100_prompt.yaml",
-                "--gpuid", "2",
+                "--gpuid", "0", "1", "2", "3",
                 "--repeat", "1",
                 "--overwrite", "1",
                 "--learner_type", "prompt",
