@@ -17,9 +17,9 @@
                 "--repeat", "1",
                 "--overwrite", "1",
                 "--learner_type", "prompt",
-                "--learner_name", "CODAPrompt",
+                "--learner_name", "MatrixPrompt",
                 "--prompt_param", "100", "8", "0.1",
-                "--log_dir", "outputs/CIFAR100/10-task/coda-p",
+                "--log_dir", "outputs/CIFAR100/10-task/matrix-p-8",
             ],
         }
     ]
