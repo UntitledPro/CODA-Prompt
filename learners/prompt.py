@@ -23,6 +23,7 @@ class Prompt(NormalNN):
         total_loss = self.criterion(logits, targets.long(), dw_cls)
 
         # ce loss
+        # print('prompt loss: ', prompt_loss.sum())
         total_loss = total_loss + prompt_loss.sum()
 
         # step

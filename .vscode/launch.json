@@ -12,14 +12,14 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "--config", "configs/cifar-100_prompt.yaml",
+                "--config", "configs/test.yaml",
                 "--gpuid", "0", "1", "2", "3",
                 "--repeat", "1",
                 "--overwrite", "1",
                 "--learner_type", "prompt",
                 "--learner_name", "MatrixPrompt",
                 "--prompt_param", "100", "8", "0.1",
-                "--log_dir", "outputs/CIFAR100/10-task/matrix-p-8",
+                "--log_dir", "outputs/CIFAR100/10-task/matrix-p-test",
             ],
         }
     ]

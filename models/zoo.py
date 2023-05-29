@@ -38,6 +38,9 @@ class MatrixPrompt(nn.Module):
 
         g_cls = tensor_prompt(self.g_pool_size, self.emb_d, ortho=True)
         setattr(self, 'g_cls', g_cls)
+        if self.ortho_mu > 0:
+            print('|-' * 100 + '|')
+            print('ortho penalty is on')
 
     def _init_smart(self, prompt_param) -> None:
         '''initiate basic parameters: int | float | List'''
@@ -47,18 +50,18 @@ class MatrixPrompt(nn.Module):
         # number of prompts in each prompt group
         self.e_p_length = int(prompt_param[1])
         self.e_layers: list[int] = [0, 1, 2, 3, 4]
-
-        self.g_pool_size = int(prompt_param[0])
-
         # strength of ortho penalty
         self.ortho_mu: float = prompt_param[2]
+
+        self.g_pool_size = int(prompt_param[0])
+        self.nb_pt = int(self.g_pool_size / (self.n_tasks))
 
     def process_task_count(self) -> None:
         self.task_count += 1
 
     def forward(self, x_querry: Tensor, idx: int,
                 x_block: Tensor, train=False, task_id=None):
-
+        assert self.task_count == task_id, 'task id does not match'
         # e prompts
         e_valid = False
         if idx in self.e_layers:
@@ -96,6 +99,7 @@ class MatrixPrompt(nn.Module):
             n_K = nn.functional.normalize(K, dim=1)
             q = nn.functional.normalize(a_querry, dim=2)
             aq_k = torch.einsum('bkd,kd->bk', q, n_K)
+            # # TODO-ablation: using softmax for attention
             # aq_k = nn.Softmax(dim=1)(aq_k * self.key_d ** -0.5)
             # weighted sum
             # (b x 1 x k x 1) * [1 x plen x k x d] = (b x plen x d) -> prompt = plen x k x d
@@ -113,18 +117,18 @@ class MatrixPrompt(nn.Module):
             compute ortho penalty for dim=1
             '''
             # loss = 0
-            # loss_cls_p = 0
             if train and self.ortho_mu > 0:
                 loss = ortho_penalty(K)
                 loss += ortho_penalty(A)
+                loss += ortho_penalty(p.flatten(start_dim=1, end_dim=2))
+                # TODO-ablation: orthogonal loss 1) formation, 2) with/without
+                # loss_cls_p = 0
                 # for cls_idx in range(len(p)):
                 #     p_cls = p[cls_idx]
                 #     loss_cls_p += ortho_penalty(p_cls)
                 # loss_cls_p = loss_cls_p / len(p)
                 # loss += loss_cls_p
-                loss += ortho_penalty(p.flatten(start_dim=1, end_dim=2))
                 loss = loss * self.ortho_mu
-
             else:
                 loss = 0
         else:
@@ -433,7 +437,7 @@ class ResNetZoo(nn.Module):
         # get last layer
         self.last = nn.Linear(512, num_classes)
         self.prompt_flag: bool = prompt_flag
-        self.task_id = None
+        self.task_id = 0
 
         # get feature encoder
         zoo_model = VisionTransformer(img_size=224, patch_size=16, embed_dim=768, depth=12,
@@ -496,7 +500,7 @@ class TopDownZoo(nn.Module):
         # get last layer
         self.last = nn.Linear(512, num_classes)
         self.prompt_flag: bool = prompt_flag
-        self.task_id = None
+        self.task_id = 0
 
         # get feature encoder
         zoo_model = VisionTransformer(img_size=224, patch_size=16, embed_dim=768, depth=12,
@@ -513,30 +517,36 @@ class TopDownZoo(nn.Module):
         self.last = nn.Linear(768, num_classes)
 
         # create prompting module
-        if self.prompt_flag == 'l2p':
-            self.prompt = L2P(768, prompt_param[0], prompt_param[1])
-        elif self.prompt_flag == 'dual':
-            self.prompt = DualPrompt(768, prompt_param[0], prompt_param[1])
-        elif self.prompt_flag == 'coda':
-            self.prompt = CodaPrompt(768, prompt_param[0], prompt_param[1])
-        elif self.prompt_flag == 'coda':
-            self.prompt = CodaPrompt(768, prompt_param[0], prompt_param[1])
-        else:
-            self.prompt = None
-        print('Prompt strategy:')
+        assert self.prompt_flag == 'matrix', 'only support matrix prompt'
+        print('Prompt strategy: ', self.prompt_flag)
+        self.prompt = MatrixPrompt(768, prompt_param[0], prompt_param[1])
 
         # feature encoder changes if transformer vs resnet
         self.feat: VisionTransformer = zoo_model
 
     # pen: get penultimate features
     def forward(self, x, pen=False, train=False):
+        assert self.task_id is not None, 'task_id is None'
+
         prompt_loss = 0
+        B = x.size(0)
         if self.prompt is not None:
+            glob_start = (self.task_id) * self.prompt.nb_pt
+            glob_end = (self.task_id + 1) * self.prompt.nb_pt
+            g_cls = getattr(self.prompt, 'g_cls')
+            glob_x = torch.cat(
+                (g_cls[:, :glob_start].detach().clone(), g_cls[:, glob_end:]),
+                dim=1
+            )
+            glob_x = glob_x[None, :].expand(B, -1, -1)
             with torch.no_grad():
-                q, _ = self.feat(x)
+                q, _ = self.feat(x, glob_x=glob_x)
                 q = q[:, 0, :]
             out, prompt_loss = self.feat(
-                x, prompt=self.prompt, q=q, train=train, task_id=self.task_id)
+                x, prompt=self.prompt, q=q,
+                glob_x=glob_x,
+                train=train, task_id=self.task_id)
+            cls_hint = out[:, -glob_end:, :]
             out = out[:, 0, :]
         else:
             out, _ = self.feat(x)
@@ -552,3 +562,7 @@ class TopDownZoo(nn.Module):
 
 def vit_pt_imnet(out_dim, block_division=None, prompt_flag='None', prompt_param=None):
     return ResNetZoo(num_classes=out_dim, prompt_flag=prompt_flag, prompt_param=prompt_param)
+
+
+def vit_pt_td(out_dim, block_division=None, prompt_flag='None', prompt_param=None):
+    return TopDownZoo(num_classes=out_dim, prompt_flag=prompt_flag, prompt_param=prompt_param)

@@ -186,7 +186,9 @@ class VisionTransformer(nn.Module):
     def no_weight_decay(self):
         return {'pos_embed', 'cls_token'}
 
-    def forward(self, x, register_blk=-1, prompt=None, q=None, train=False, task_id=None):
+    def forward(self, x, register_blk=-1,
+                prompt=None, q=None, glob_x=None,
+                train=False, task_id=None):
         B = x.shape[0]
         x = self.patch_embed(x)
 
@@ -195,6 +197,8 @@ class VisionTransformer(nn.Module):
         x = torch.cat((cls_tokens, x), dim=1)
 
         x = x + self.pos_embed[:, :x.size(1), :]
+        if glob_x is not None:
+            x = torch.cat((x, glob_x), dim=1)
         x = self.pos_drop(x)
 
         prompt_loss: Tensor = torch.zeros((1,), requires_grad=True).cuda()

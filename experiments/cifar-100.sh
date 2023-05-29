@@ -6,7 +6,7 @@ DATASET=cifar-100
 OUTDIR=outputs/${DATASET}/10-task
 
 # hard coded inputs
-GPUID='0 1 2 3'
+GPUID='0 2 3'
 CONFIG=configs/cifar-100_prompt.yaml
 REPEAT=1
 OVERWRITE=1
@@ -22,10 +22,11 @@ mkdir -p $OUTDIR
 #    arg 1 = prompt component pool size
 #    arg 2 = prompt length
 #    arg 3 = ortho penalty loss weight/ortho_mu
-python -u run.py --config $CONFIG --gpuid $GPUID --repeat $REPEAT --overwrite $OVERWRITE \
-    --learner_type prompt --learner_name MatrixPrompt \
-    --prompt_param 100 8 0.1 \
-    --log_dir ${OUTDIR}/matrix-p-1
+nohup python -u run.py --config $CONFIG --gpuid $GPUID --repeat $REPEAT --overwrite $OVERWRITE \
+        --learner_type prompt --learner_name MatrixPrompt \
+        --prompt_param 100 8 0.1 \
+        --log_dir ${OUTDIR}/matrix-p-8-soft \
+        >matrix-p-8-soft.log 2>&1 &
 
 # CODA-P
 #
