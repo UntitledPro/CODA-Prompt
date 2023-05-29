@@ -86,6 +86,18 @@ class Prompt(NormalNN):
 # Our method!
 
 
+class MatrixPrompt(Prompt):
+
+    def __init__(self, learner_config):
+        super(MatrixPrompt, self).__init__(learner_config)
+
+    def create_model(self):
+        cfg = self.config
+        model = models.__dict__[cfg['model_type']].__dict__[cfg['model_name']](
+            out_dim=self.out_dim, prompt_flag='matrix', prompt_param=self.prompt_param)
+        return model
+
+
 class CODAPrompt(Prompt):
 
     def __init__(self, learner_config):
