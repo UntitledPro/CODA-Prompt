@@ -8,6 +8,7 @@ OUTDIR=outputs/${DATASET}/10-task
 # hard coded inputs
 GPUID='0 2 3'
 CONFIG=configs/cifar-100_prompt.yaml
+CONFIG_test=configs/test.yaml
 REPEAT=1
 OVERWRITE=1
 
@@ -17,16 +18,29 @@ OVERWRITE=1
 mkdir -p $OUTDIR
 
 # Matrix-P
+
+# prompt parameter args:
+#    arg 1 = prompt component pool size
+#    arg 2 = prompt length
+#    arg 3 = ortho penalty loss weight/ortho_mu
+nohup python -u run.py --config "$CONFIG_test" --gpuid $GPUID --repeat "$REPEAT" --overwrite "$OVERWRITE" \
+        --learner_type prompt --learner_name MatrixPrompt \
+        --prompt_param 100 8 0.1 \
+        --log_dir ${OUTDIR}/test-8-freeze_linear_part \
+        >test-8-freeze_linear_part.log 2>&1 &
+
+
+# Matrix-P
 #
 # prompt parameter args:
 #    arg 1 = prompt component pool size
 #    arg 2 = prompt length
 #    arg 3 = ortho penalty loss weight/ortho_mu
-nohup python -u run.py --config $CONFIG --gpuid $GPUID --repeat $REPEAT --overwrite $OVERWRITE \
-        --learner_type prompt --learner_name MatrixPrompt \
-        --prompt_param 100 8 0.1 \
-        --log_dir ${OUTDIR}/matrix-p-8-soft \
-        >matrix-p-8-soft.log 2>&1 &
+# nohup python -u run.py --config $CONFIG --gpuid $GPUID --repeat $REPEAT --overwrite $OVERWRITE \
+#         --learner_type prompt --learner_name MatrixPrompt \
+#         --prompt_param 100 8 0.1 \
+#         --log_dir ${OUTDIR}/matrix-p-8-noAKP \
+#         >matrix-p-8-noAKP.log 2>&1 &
 
 # CODA-P
 #
@@ -45,10 +59,11 @@ nohup python -u run.py --config $CONFIG --gpuid $GPUID --repeat $REPEAT --overwr
 #    arg 1 = e-prompt pool size (# tasks)
 #    arg 2 = e-prompt pool length
 #    arg 3 = g-prompt pool length
-# python -u run.py --config $CONFIG --gpuid $GPUID --repeat $REPEAT --overwrite $OVERWRITE \
-#     --learner_type prompt --learner_name DualPrompt \
-#     --prompt_param 10 160 160 \
-#     --log_dir ${OUTDIR}/dual-prompt-160-miniloss
+# nohup python -u run.py --config $CONFIG --gpuid $GPUID --repeat $REPEAT --overwrite $OVERWRITE \
+#         --learner_type prompt --learner_name DualPrompt \
+#         --prompt_param 10 160 160 \
+#         --log_dir ${OUTDIR}/dual-prompt-160-miniloss \
+#         >dual-prompt-p-8-soft.log 2>&1 &
 
 # L2P++
 #

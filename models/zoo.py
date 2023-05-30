@@ -59,6 +59,9 @@ class MatrixPrompt(nn.Module):
     def process_task_count(self) -> None:
         self.task_count += 1
 
+    def rand_topk(self, similarity: Tensor):
+        return similarity.topk(self.nb_pt, dim=1)
+
     def forward(self, x_querry: Tensor, idx: int,
                 x_block: Tensor, train=False, task_id=None):
         assert self.task_count == task_id, 'task id does not match'
@@ -68,6 +71,7 @@ class MatrixPrompt(nn.Module):
             e_valid = True
             B, C = x_querry.shape
 
+            g_p: Parameter = getattr(self, 'g_cls')
             K: Parameter = getattr(self, f'e_k_{idx}')
             A: Parameter = getattr(self, f'e_a_{idx}')
             p: Parameter = getattr(self, f'e_p_{idx}')
@@ -80,14 +84,17 @@ class MatrixPrompt(nn.Module):
             # prompt: [n_task * 10, p_length, emb_d]
             if train:
                 if self.task_count > 0:
+                    g_p = torch.cat((g_p[:s].detach().clone(), g_p[s:f]), dim=0)
                     K = torch.cat((K[:s].detach().clone(), K[s:f]), dim=0)
                     A = torch.cat((A[:s].detach().clone(), A[s:f]), dim=0)
                     p = torch.cat((p[:s].detach().clone(), p[s:f]), dim=0)
                 else:
+                    g_p = g_p[s:f]
                     K = K[s:f]
                     A = A[s:f]
                     p = p[s:f]
             else:
+                g_p = g_p[0:f]
                 K = K[0:f]
                 A = A[0:f]
                 p = p[0:f]
@@ -99,7 +106,7 @@ class MatrixPrompt(nn.Module):
             n_K = nn.functional.normalize(K, dim=1)
             q = nn.functional.normalize(a_querry, dim=2)
             aq_k = torch.einsum('bkd,kd->bk', q, n_K)
-            # # TODO-ablation: using softmax for attention
+            # # TODO-ablation: using softmax for attention, damage accuracy
             # aq_k = nn.Softmax(dim=1)(aq_k * self.key_d ** -0.5)
             # weighted sum
             # (b x 1 x k x 1) * [1 x plen x k x d] = (b x plen x d) -> prompt = plen x k x d
@@ -118,7 +125,8 @@ class MatrixPrompt(nn.Module):
             '''
             # loss = 0
             if train and self.ortho_mu > 0:
-                loss = ortho_penalty(K)
+                loss = ortho_penalty(g_p)
+                loss += ortho_penalty(K)
                 loss += ortho_penalty(A)
                 loss += ortho_penalty(p.flatten(start_dim=1, end_dim=2))
                 # TODO-ablation: orthogonal loss 1) formation, 2) with/without
@@ -286,7 +294,8 @@ class DualPrompt(nn.Module):
         # number of prompts: 10 * 10 = 100
         for e in self.e_layers:
             # [pool_size, p_length, p_dim]:[10, 20, d]
-            p = tensor_prompt(self.e_pool_size, self.e_p_length, emb_d)
+            p = tensor_prompt(self.e_pool_size, self.e_p_length,
+                              emb_d, ortho=True)
             # [pool_size, k_dim]
             k = tensor_prompt(self.e_pool_size, self.key_d, ortho=True)
             setattr(self, f'e_p_{e}', p)
@@ -524,21 +533,57 @@ class TopDownZoo(nn.Module):
         # feature encoder changes if transformer vs resnet
         self.feat: VisionTransformer = zoo_model
 
+    def cls_hint_loss(self, cls_hint: Tensor):
+        '''
+        Args:
+            cls_hint:   [B, (self.task_id + 1) * self.prompt.nb_pt, emb_d]
+                        ex. [32, 10 * task_id, 768]
+        '''
+        # [(self.task_id + 1) * self.prompt.nb_pt,]
+        hint_labels = torch.arange(cls_hint.size(1)).to(cls_hint.device)
+        # [B, (self.task_id + 1) * self.prompt.nb_pt,]
+        hint_labels = hint_labels[None, :].expand(cls_hint.size(0), -1)
+        # [B * (self.task_id + 1) * self.prompt.nb_pt,]
+        hint_labels = hint_labels.reshape(-1)
+        # [B * (self.task_id + 1) * self.prompt.nb_pt, num_classes]
+        hint_logits = self.last(cls_hint.reshape(-1, cls_hint.size(-1)))
+
+        # start index of the task
+        task_s = (self.task_id) * self.prompt.nb_pt
+        # end index of the task
+        task_e = (self.task_id + 1) * self.prompt.nb_pt
+        # detach 0:task_s, set task_e:end to -inf, and keep task_s:task_e
+        hint_logits = torch.cat(
+            (hint_logits[:, :task_s].detach().clone(),
+             hint_logits[:, task_s:]),
+            dim=1
+        )
+        hint_logits[:, task_e:] = -torch.inf
+
+        critn = nn.CrossEntropyLoss()
+        hint_loss = critn(hint_logits, hint_labels)
+        return hint_loss
+
     # pen: get penultimate features
     def forward(self, x, pen=False, train=False):
         assert self.task_id is not None, 'task_id is None'
 
-        prompt_loss = 0
+        prompt_loss = tensor(0)
+        cls_hint = tensor(0)
         B = x.size(0)
         if self.prompt is not None:
+            'initialize class hint'
             glob_start = (self.task_id) * self.prompt.nb_pt
             glob_end = (self.task_id + 1) * self.prompt.nb_pt
             g_cls = getattr(self.prompt, 'g_cls')
             glob_x = torch.cat(
-                (g_cls[:, :glob_start].detach().clone(), g_cls[:, glob_end:]),
-                dim=1
+                (g_cls[:glob_start, :].detach().clone(),
+                 g_cls[glob_start:glob_end, :]),
+                dim=0
             )
             glob_x = glob_x[None, :].expand(B, -1, -1)
+            assert glob_x.size(1) == glob_end, 'glob_x size error'
+
             with torch.no_grad():
                 q, _ = self.feat(x, glob_x=glob_x)
                 q = q[:, 0, :]
@@ -546,7 +591,7 @@ class TopDownZoo(nn.Module):
                 x, prompt=self.prompt, q=q,
                 glob_x=glob_x,
                 train=train, task_id=self.task_id)
-            cls_hint = out[:, -glob_end:, :]
+            cls_hint = out[:, -self.prompt.nb_pt:, :]
             out = out[:, 0, :]
         else:
             out, _ = self.feat(x)
@@ -555,6 +600,8 @@ class TopDownZoo(nn.Module):
         if not pen:
             out = self.last(out)
         if self.prompt is not None and train:
+            hint_loss = self.cls_hint_loss(cls_hint)
+            prompt_loss += hint_loss
             return out, prompt_loss
         else:
             return out
