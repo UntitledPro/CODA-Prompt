@@ -87,11 +87,15 @@ class Prompt(NormalNN):
 # Our method!
 
 
+class IntPrompt(Prompt):
+    def create_model(self):
+        cfg = self.config
+        model = models.__dict__[cfg['model_type']].__dict__[cfg['model_name']](
+            out_dim=self.out_dim, prompt_flag='int', prompt_param=self.prompt_param)
+        return model
+
+
 class MatrixPrompt(Prompt):
-
-    def __init__(self, learner_config):
-        super(MatrixPrompt, self).__init__(learner_config)
-
     def create_model(self):
         cfg = self.config
         model = models.__dict__[cfg['model_type']].__dict__[cfg['model_name']](
@@ -100,10 +104,6 @@ class MatrixPrompt(Prompt):
 
 
 class CODAPrompt(Prompt):
-
-    def __init__(self, learner_config):
-        super(CODAPrompt, self).__init__(learner_config)
-
     def create_model(self):
         cfg = self.config
         model = models.__dict__[cfg['model_type']].__dict__[cfg['model_name']](
@@ -120,10 +120,6 @@ class DualPrompt(Prompt):
         year={2022}
     }
     '''
-
-    def __init__(self, learner_config):
-        super(DualPrompt, self).__init__(learner_config)
-
     def create_model(self):
         cfg = self.config
         model = models.__dict__[cfg['model_type']].__dict__[cfg['model_name']](
@@ -141,10 +137,6 @@ class L2P(Prompt):
         year={2022}
     }
     '''
-
-    def __init__(self, learner_config):
-        super(L2P, self).__init__(learner_config)
-
     def create_model(self):
         cfg = self.config
         model = models.__dict__[cfg['model_type']].__dict__[cfg['model_name']](

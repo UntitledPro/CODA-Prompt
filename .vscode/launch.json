@@ -17,7 +17,7 @@
                 "--repeat", "1",
                 "--overwrite", "1",
                 "--learner_type", "prompt",
-                "--learner_name", "MatrixPrompt",
+                "--learner_name", "IntPrompt",
                 "--prompt_param", "100", "8", "0.1",
                 "--log_dir", "outputs/CIFAR100/10-task/matrix-p-test",
             ],

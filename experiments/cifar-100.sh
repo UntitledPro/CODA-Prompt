@@ -1,3 +1,4 @@
+#! /bin/bash
 # bash experiments/cifar-100.sh
 # experiment settings
 DATASET=cifar-100
@@ -6,7 +7,7 @@ DATASET=cifar-100
 OUTDIR=outputs/${DATASET}/10-task
 
 # hard coded inputs
-GPUID='0 2 3'
+GPUID='0 1 2 3'
 CONFIG=configs/cifar-100_prompt.yaml
 CONFIG_test=configs/test.yaml
 REPEAT=1
@@ -23,11 +24,16 @@ mkdir -p $OUTDIR
 #    arg 1 = prompt component pool size
 #    arg 2 = prompt length
 #    arg 3 = ortho penalty loss weight/ortho_mu
+# nohup python -u run.py --config "$CONFIG_test" --gpuid $GPUID --repeat "$REPEAT" --overwrite "$OVERWRITE" \
+#         --learner_type prompt --learner_name MatrixPrompt \
+#         --prompt_param 100 8 0.1 \
+#         --log_dir ${OUTDIR}/test-8-freeze_linear_cosine \
+#         >test-8-freeze_linear_cosine.log 2>&1 &
 nohup python -u run.py --config "$CONFIG_test" --gpuid $GPUID --repeat "$REPEAT" --overwrite "$OVERWRITE" \
-        --learner_type prompt --learner_name MatrixPrompt \
-        --prompt_param 100 8 0.1 \
-        --log_dir ${OUTDIR}/test-8-freeze_linear_part \
-        >test-8-freeze_linear_part.log 2>&1 &
+        --learner_type prompt --learner_name IntPrompt \
+        --prompt_param 100 20 0.1 \
+        --log_dir ${OUTDIR}/int-8-rndchs_07_mat \
+        >int-8-rndchs_07_mat.log 2>&1 &
 
 
 # Matrix-P
@@ -52,6 +58,11 @@ nohup python -u run.py --config "$CONFIG_test" --gpuid $GPUID --repeat "$REPEAT"
 #     --learner_type prompt --learner_name CODAPrompt \
 #     --prompt_param 100 8 0.1 \
 #     --log_dir ${OUTDIR}/coda-p
+# python -u run.py --config $CONFIG --gpuid $GPUID --repeat $REPEAT --overwrite $OVERWRITE \
+#     --learner_type prompt --learner_name CODAPrompt \
+#     --prompt_param 100 8 0.1 \
+#     --upper_bound_flag \
+#     --log_dir ${OUTDIR}/coda-p-upperbound
 
 # DualPrompt
 #
@@ -78,4 +89,4 @@ nohup python -u run.py --config "$CONFIG_test" --gpuid $GPUID --repeat "$REPEAT"
 # python -u run.py --config $CONFIG --gpuid $GPUID --repeat $REPEAT --overwrite $OVERWRITE \
 #     --learner_type prompt --learner_name L2P \
 #     --prompt_param 30 20 1 \
-#     --log_dir ${OUTDIR}/l2p++_deep
+#     --log_dir ${OUTDIR}/l2p++_deep++

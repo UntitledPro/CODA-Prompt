@@ -1,11 +1,11 @@
-from ctypes import Union
-from cv2 import Mat
 import torch
 from torch.nn.parameter import Parameter
 import torch.nn as nn
 from .vit import VisionTransformer
-from typing import Dict, List, Union, Any
+from typing import List
 from torch import Tensor, tensor
+import torch.nn.functional as F
+import math
 # Our method!
 
 
@@ -62,61 +62,74 @@ class MatrixPrompt(nn.Module):
     def rand_topk(self, similarity: Tensor):
         return similarity.topk(self.nb_pt, dim=1)
 
-    def forward(self, x_querry: Tensor, idx: int,
-                x_block: Tensor, train=False, task_id=None):
+    def forward(self, x_querry: Tensor,
+                idx: int, x_block: Tensor,
+                train=False, task_id=None):
         assert self.task_count == task_id, 'task id does not match'
         # e prompts
         e_valid = False
+        int_e_key = None
+        int_e_value = None
         if idx in self.e_layers:
             e_valid = True
             B, C = x_querry.shape
 
-            g_p: Parameter = getattr(self, 'g_cls')
-            K: Parameter = getattr(self, f'e_k_{idx}')
-            A: Parameter = getattr(self, f'e_a_{idx}')
-            p: Parameter = getattr(self, f'e_p_{idx}')
+            g_p = getattr(self, 'g_cls')
+            e_a = getattr(self, f'e_a_{idx}')
+            e_key = getattr(self, f'e_k_{idx}')
+            e_prompt = getattr(self, f'e_p_{idx}')
             # the number of prompts per task
             nb_pt = int(self.e_pool_size / (self.n_tasks))
-            s = int(self.task_count * nb_pt)
-            f = int((self.task_count + 1) * nb_pt)
+            task_start = int(self.task_count * nb_pt)
+            task_end = int((self.task_count + 1) * nb_pt)
 
             # freeze/control past tasks
             # prompt: [n_task * 10, p_length, emb_d]
             if train:
                 if self.task_count > 0:
-                    g_p = torch.cat((g_p[:s].detach().clone(), g_p[s:f]), dim=0)
-                    K = torch.cat((K[:s].detach().clone(), K[s:f]), dim=0)
-                    A = torch.cat((A[:s].detach().clone(), A[s:f]), dim=0)
-                    p = torch.cat((p[:s].detach().clone(), p[s:f]), dim=0)
+                    g_p = torch.cat(
+                        (g_p[:task_start].detach().clone(),
+                         g_p[task_start:task_end]),
+                        dim=0)
+                    e_key = torch.cat(
+                        (e_key[:task_start].detach().clone(),
+                         e_key[task_start:task_end]),
+                        dim=0)
+                    e_a = torch.cat(
+                        (e_a[:task_start].detach().clone(),
+                         e_a[task_start:task_end]),
+                        dim=0)
+                    e_prompt = torch.cat(
+                        (e_prompt[:task_start].detach().clone(),
+                         e_prompt[task_start:task_end]),
+                        dim=0)
                 else:
-                    g_p = g_p[s:f]
-                    K = K[s:f]
-                    A = A[s:f]
-                    p = p[s:f]
+                    g_p = g_p[task_start:task_end]
+                    e_key = e_key[task_start:task_end]
+                    e_a = e_a[task_start:task_end]
+                    e_prompt = e_prompt[task_start:task_end]
             else:
-                g_p = g_p[0:f]
-                K = K[0:f]
-                A = A[0:f]
-                p = p[0:f]
+                g_p = g_p[0:task_end]
+                e_key = e_key[0:task_end]
+                e_a = e_a[0:task_end]
+                e_prompt = e_prompt[0:task_end]
 
             # with attention and cosine sim
             # (b x 1 x d) * soft([1 x k x d]) = (b x k x d) -> attention = k x d
-            a_querry = torch.einsum('bd,kd->bkd', x_querry, A)
+            a_querry = torch.einsum('bd,kd->bkd', x_querry, e_a)
             # # (b x k x d) - [1 x k x d] = (b x k) -> key = k x d
-            n_K = nn.functional.normalize(K, dim=1)
-            q = nn.functional.normalize(a_querry, dim=2)
-            aq_k = torch.einsum('bkd,kd->bk', q, n_K)
-            # # TODO-ablation: using softmax for attention, damage accuracy
-            # aq_k = nn.Softmax(dim=1)(aq_k * self.key_d ** -0.5)
+            e_key_nrom = nn.functional.normalize(e_key, dim=1)
+            qry_norm = nn.functional.normalize(a_querry, dim=2)
+            sim = torch.einsum('bkd,kd->bk', qry_norm, e_key_nrom)
             # weighted sum
             # (b x 1 x k x 1) * [1 x plen x k x d] = (b x plen x d) -> prompt = plen x k x d
-            # [bt_size, p_length, emb_d]
-            P_ = torch.einsum('bk,kld->bld', aq_k, p)
+            # integrated_prompt: [bt_size, p_length, emb_d]
+            int_pmt = torch.einsum('bk,kld->bld', sim, e_prompt)
 
             # select prompts
             i = int(self.e_p_length / 2)
-            Ek = P_[:, :i, :]
-            Ev = P_[:, i:, :]
+            int_e_key = int_pmt[:, :i, :]
+            int_e_value = int_pmt[:, i:, :]
 
             # ortho penalty
             '''
@@ -126,9 +139,10 @@ class MatrixPrompt(nn.Module):
             # loss = 0
             if train and self.ortho_mu > 0:
                 loss = ortho_penalty(g_p)
-                loss += ortho_penalty(K)
-                loss += ortho_penalty(A)
-                loss += ortho_penalty(p.flatten(start_dim=1, end_dim=2))
+                loss += ortho_penalty(e_key)
+                loss += ortho_penalty(e_a)
+                loss += ortho_penalty(e_prompt.
+                                      flatten(start_dim=1, end_dim=2))
                 # TODO-ablation: orthogonal loss 1) formation, 2) with/without
                 # loss_cls_p = 0
                 # for cls_idx in range(len(p)):
@@ -144,7 +158,145 @@ class MatrixPrompt(nn.Module):
 
         # combine prompts for prefix tuning
         if e_valid:
-            p_return = [Ek, Ev]
+            p_return = [int_e_key, int_e_value]
+        else:
+            p_return = None
+
+        # return
+        return p_return, loss, x_block
+
+
+class IntPrompt(MatrixPrompt):
+    def __init__(self, emb_d, n_tasks, prompt_param, key_dim=768):
+        super().__init__(emb_d, n_tasks, prompt_param, key_dim)
+        self.topk = 10
+
+    def rewrite_sim(self, sim, train=False):
+        """
+        训练，随机
+        Args:
+            sim: [B, task_count * 10]
+        """
+        topk = self.topk
+        nb_pt = int(self.e_pool_size / (self.n_tasks))
+        device = sim.device
+        task_start = int(self.task_count * nb_pt)
+        alpha = torch.rand(1)[0]
+        if train and alpha > 0.7:
+            sim_zeroed = sim
+            sim_zeroed[:, :task_start] = 0.
+        else:
+            topk_vals, topk_idxs = torch.topk(sim, topk, dim=1)
+            sim_zeroed = torch.zeros_like(sim).to(device)
+            sim_zeroed.scatter_(dim=1, index=topk_idxs, src=topk_vals)
+
+        _, topk_mat = torch.topk(sim_zeroed, 3, dim=1)
+        loss_sim = (1 - sim_zeroed[:, topk_mat]).mean()
+        return sim_zeroed, loss_sim
+
+    def forward(self, x_querry: Tensor,
+                idx: int, x_block: Tensor,
+                train=False, task_id=None):
+        assert self.task_count == task_id, 'task id does not match'
+        # e prompts
+        e_valid = False
+        int_e_key = None
+        int_e_value = None
+        if idx in self.e_layers:
+            e_valid = True
+
+            g_p = getattr(self, 'g_cls')
+            e_a = getattr(self, f'e_a_{idx}')
+            e_key = getattr(self, f'e_k_{idx}')
+            e_prompt = getattr(self, f'e_p_{idx}')
+            # the number of prompts per task
+            nb_pt = int(self.e_pool_size / (self.n_tasks))
+            task_start = int(self.task_count * nb_pt)
+            task_end = int((self.task_count + 1) * nb_pt)
+
+            # freeze/control past tasks
+            # prompt: [n_task * 10, p_length, emb_d]
+            'get prompts: g_p, e_key, e_a, e_prompt'
+            if train:
+                if self.task_count > 0:
+                    g_p = torch.cat(
+                        (g_p[:task_start].detach().clone(),
+                         g_p[task_start:task_end]),
+                        dim=0)
+                    e_key = torch.cat(
+                        (e_key[:task_start].detach().clone(),
+                         e_key[task_start:task_end]),
+                        dim=0)
+                    e_a = torch.cat(
+                        (e_a[:task_start].detach().clone(),
+                         e_a[task_start:task_end]),
+                        dim=0)
+                    e_prompt = torch.cat(
+                        (e_prompt[:task_start].detach().clone(),
+                         e_prompt[task_start:task_end]),
+                        dim=0)
+                else:
+                    g_p = g_p[task_start:task_end]
+                    e_key = e_key[task_start:task_end]
+                    e_a = e_a[task_start:task_end]
+                    e_prompt = e_prompt[task_start:task_end]
+            else:
+                g_p = g_p[0:task_end]
+                e_key = e_key[0:task_end]
+                e_a = e_a[0:task_end]
+                e_prompt = e_prompt[0:task_end]
+
+            # with attention and cosine sim
+            # (b x 1 x d) * soft([1 x k x d]) = (b x k x d) -> attention = k x d
+            a_querry = torch.einsum('bd,kd->bkd', x_querry, e_a)
+            # # (b x k x d) - [1 x k x d] = (b x k) -> key = k x d
+            e_key_nrom = nn.functional.normalize(e_key, dim=1)
+            qry_norm = nn.functional.normalize(a_querry, dim=2)
+            # [B, (task_count + 1) * nb_pt]
+            sim = torch.einsum('bkd,kd->bk', qry_norm, e_key_nrom)
+            sim, loss_sim = self.rewrite_sim(sim, train=train)
+            # # TODO-ablation: using softmax for attention, damage accuracy
+            # aq_k = nn.Softmax(dim=1)(aq_k * self.key_d ** -0.5)
+            # weighted sum
+            # (b x 1 x k x 1) * [1 x plen x k x d] = (b x plen x d) -> prompt = plen x k x d
+            # integrated_prompt: [bt_size, p_length, emb_d]
+            int_pmt = torch.einsum('bk,kld->bld', sim, e_prompt)
+
+            # select prompts
+            i = int(self.e_p_length / 2)
+            int_e_key = int_pmt[:, :i, :]
+            int_e_value = int_pmt[:, i:, :]
+
+            # ortho penalty
+            '''
+            100 x 8 x 768
+            compute ortho penalty for dim=1
+            '''
+            loss = 0
+            if train and self.ortho_mu > 0:
+                loss += ortho_penalty(g_p)
+                loss += ortho_penalty(e_key)
+                loss += ortho_penalty(e_a)
+                loss += ortho_penalty(e_prompt.
+                                      flatten(start_dim=1, end_dim=2))
+                # TODO-ablation: orthogonal loss 1) formation, 2) with/without
+                # loss_cls_p = 0
+                # for cls_idx in range(len(p)):
+                #     p_cls = p[cls_idx]
+                #     loss_cls_p += ortho_penalty(p_cls)
+                # loss_cls_p = loss_cls_p / len(p)
+                # loss += loss_cls_p
+                loss = loss * self.ortho_mu
+            else:
+                loss = 0
+
+            loss += loss_sim
+        else:
+            loss = 0
+
+        # combine prompts for prefix tuning
+        if e_valid:
+            p_return = [int_e_key, int_e_value]
         else:
             p_return = None
 
@@ -159,7 +311,7 @@ class CodaPrompt(nn.Module):
         self.emb_d = emb_d
         self.key_d = key_dim
         self.n_tasks = n_tasks
-        self._init_smart(emb_d, prompt_param)
+        self._init_smart(prompt_param)
 
         # e prompt init
         # for each layer register a prompt pool/key/alpha
@@ -179,7 +331,7 @@ class CodaPrompt(nn.Module):
             setattr(self, f'e_k_{e}', k)
             setattr(self, f'e_a_{e}', a)
 
-    def _init_smart(self, emb_d, prompt_param) -> None:
+    def _init_smart(self, prompt_param) -> None:
         '''initiate basic parameters: int | float | List'''
         # prompt basic param
         # number of prompt groups in the pool
@@ -341,7 +493,7 @@ class DualPrompt(nn.Module):
                     # [B, p_length, emb_d]
                     P_ = p[task_id].expand(len(x_querry), -1, -1)
                 else:
-                    top_k = torch.topk(cos_sim, self.top_k, dim=1)
+                    top_k = torch.topk(cos_sim, self.top_k + 3, dim=1)
                     k_idx = top_k.indices
                     # loss = (1.0 - cos_sim[:, k_idx]).sum()
                     loss = (1.0 - cos_sim[:, k_idx]).mean()
@@ -405,8 +557,8 @@ class L2P(DualPrompt):
     def __init__(self, emb_d, n_tasks, prompt_param, key_dim=768):
         super().__init__(emb_d, n_tasks, prompt_param, key_dim)
 
-    def _init_smart(self, emb_d, prompt_param):
-        self.top_k = 5
+    def _init_smart(self, prompt_param):
+        self.top_k = 10
         self.task_id_bootstrap = False
 
         # prompt locations
@@ -502,13 +654,14 @@ class ResNetZoo(nn.Module):
 
 
 class TopDownZoo(nn.Module):
-    def __init__(self, num_classes=10, prompt_flag=False,
+    def __init__(self, num_classes: int = 10,
+                 prompt_flag: str = 'None',
                  prompt_param: List[float] = []):
         super(TopDownZoo, self).__init__()
 
         # get last layer
         self.last = nn.Linear(512, num_classes)
-        self.prompt_flag: bool = prompt_flag
+        self.prompt_flag: str = prompt_flag
         self.task_id = 0
 
         # get feature encoder
@@ -523,12 +676,17 @@ class TopDownZoo(nn.Module):
         zoo_model.load_state_dict(load_dict)
 
         # classifier
-        self.last = nn.Linear(768, num_classes)
+        # self.last = nn.Linear(768, num_classes)
+        self.last = CosineLinear(768, num_classes, sigma=True)
 
         # create prompting module
-        assert self.prompt_flag == 'matrix', 'only support matrix prompt'
+        if self.prompt_flag == 'matrix':
+            self.prompt = MatrixPrompt(768, prompt_param[0], prompt_param[1])
+        elif self.prompt_flag == 'int':
+            self.prompt = IntPrompt(768, prompt_param[0], prompt_param[1])
+        else:
+            raise NotImplementedError
         print('Prompt strategy: ', self.prompt_flag)
-        self.prompt = MatrixPrompt(768, prompt_param[0], prompt_param[1])
 
         # feature encoder changes if transformer vs resnet
         self.feat: VisionTransformer = zoo_model
@@ -539,25 +697,34 @@ class TopDownZoo(nn.Module):
             cls_hint:   [B, (self.task_id + 1) * self.prompt.nb_pt, emb_d]
                         ex. [32, 10 * task_id, 768]
         '''
-        # [(self.task_id + 1) * self.prompt.nb_pt,]
-        hint_labels = torch.arange(cls_hint.size(1)).to(cls_hint.device)
-        # [B, (self.task_id + 1) * self.prompt.nb_pt,]
-        hint_labels = hint_labels[None, :].expand(cls_hint.size(0), -1)
-        # [B * (self.task_id + 1) * self.prompt.nb_pt,]
-        hint_labels = hint_labels.reshape(-1)
-        # [B * (self.task_id + 1) * self.prompt.nb_pt, num_classes]
-        hint_logits = self.last(cls_hint.reshape(-1, cls_hint.size(-1)))
-
         # start index of the task
         task_s = (self.task_id) * self.prompt.nb_pt
         # end index of the task
         task_e = (self.task_id + 1) * self.prompt.nb_pt
+        cls_hint_task = cls_hint
+        # [(self.task_id + 1) * self.prompt.nb_pt,]
+        hint_labels = torch.arange(
+            cls_hint_task.size(1)).to(cls_hint_task.device)
+        # [B, (self.task_id + 1) * self.prompt.nb_pt,]
+        hint_labels = hint_labels[None, :].expand(cls_hint_task.size(0), -1)
+        # [B * (self.task_id + 1) * self.prompt.nb_pt,]
+        hint_labels = hint_labels.reshape(-1)
+        # [B * (self.task_id + 1) * self.prompt.nb_pt, num_classes]
+        hint_logits = self.last(
+            cls_hint_task.reshape(-1, cls_hint_task.size(-1)))
+
         # detach 0:task_s, set task_e:end to -inf, and keep task_s:task_e
+        # TODO: detach or not detach?
         hint_logits = torch.cat(
             (hint_logits[:, :task_s].detach().clone(),
              hint_logits[:, task_s:]),
             dim=1
         )
+        # hint_logits = torch.cat(
+        #     (hint_logits[:, :task_s],
+        #      hint_logits[:, task_s:]),
+        #     dim=1
+        # )
         hint_logits[:, task_e:] = -torch.inf
 
         critn = nn.CrossEntropyLoss()
@@ -591,7 +758,7 @@ class TopDownZoo(nn.Module):
                 x, prompt=self.prompt, q=q,
                 glob_x=glob_x,
                 train=train, task_id=self.task_id)
-            cls_hint = out[:, -self.prompt.nb_pt:, :]
+            cls_hint = out[:, -glob_end:, :]
             out = out[:, 0, :]
         else:
             out, _ = self.feat(x)
@@ -601,7 +768,7 @@ class TopDownZoo(nn.Module):
             out = self.last(out)
         if self.prompt is not None and train:
             hint_loss = self.cls_hint_loss(cls_hint)
-            prompt_loss += hint_loss
+            prompt_loss += hint_loss * 0.1
             return out, prompt_loss
         else:
             return out
@@ -613,3 +780,29 @@ def vit_pt_imnet(out_dim, block_division=None, prompt_flag='None', prompt_param=
 
 def vit_pt_td(out_dim, block_division=None, prompt_flag='None', prompt_param=None):
     return TopDownZoo(num_classes=out_dim, prompt_flag=prompt_flag, prompt_param=prompt_param)
+
+
+class CosineLinear(nn.Module):
+    def __init__(self, in_features, out_features, sigma=True):
+        super(CosineLinear, self).__init__()
+        self.in_features = in_features
+        self.out_features = out_features
+        self.weight = Parameter(torch.Tensor(out_features, in_features))
+        if sigma:
+            self.sigma = Parameter(torch.Tensor(1))
+        else:
+            self.register_parameter('sigma', None)
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        stdv = 1. / math.sqrt(self.weight.size(1))
+        self.weight.data.uniform_(-stdv, stdv)
+        if self.sigma is not None:
+            self.sigma.data.fill_(10)  # for initializaiton of sigma
+
+    def forward(self, input):
+        out = F.linear(F.normalize(input, p=2, dim=1),
+                       F.normalize(self.weight, p=2, dim=1))
+        if self.sigma is not None:
+            out = self.sigma * out
+        return out
