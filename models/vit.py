@@ -199,6 +199,7 @@ class VisionTransformer(nn.Module):
         x = x + self.pos_embed[:, :x.size(1), :]
         if glob_x is not None:
             x = torch.cat((x, glob_x), dim=1)
+
         x = self.pos_drop(x)
 
         prompt_loss: Tensor = torch.zeros((1,), requires_grad=True).cuda()
