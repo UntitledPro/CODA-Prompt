@@ -53,14 +53,11 @@ class MatrixPrompt(nn.Module):
         # strength of ortho penalty
         self.ortho_mu: float = prompt_param[2]
 
-        self.g_pool_size = int(100)
+        self.g_pool_size = int(prompt_param[0])
         self.nb_pt = int(self.g_pool_size / (self.n_tasks))
 
     def process_task_count(self) -> None:
         self.task_count += 1
-
-    def rand_topk(self, similarity: Tensor):
-        return similarity.topk(self.nb_pt, dim=1)
 
     def forward(self, x_querry: Tensor,
                 idx: int, x_block: Tensor,
@@ -329,7 +326,6 @@ class TopDownZoo(nn.Module):
         """
         """
         super(TopDownZoo, self).__init__()
-
         # get last layer
         self.last = nn.Linear(512, num_classes)
         self.prompt_flag: str = prompt_flag
@@ -406,8 +402,8 @@ class TopDownZoo(nn.Module):
     def forward(self, x, pen=False, train=False):
         assert self.task_id is not None, 'task_id is None'
 
-        prompt_loss = tensor(0)
-        cls_hint = tensor(0)
+        prompt_loss = tensor(0.)
+        cls_hint = tensor(0.)
         B = x.size(0)
         if self.prompt is not None:
             'initialize class hint'
@@ -437,10 +433,12 @@ class TopDownZoo(nn.Module):
         out = out.view(out.size(0), -1)
         if not pen:
             out = self.last(out)
+
+        'return cfg'
         if self.prompt is not None and train:
             return (out,), prompt_loss
         elif self.prompt is not None and train and glob_x is not None:
-            return (out, cls_hint,), prompt_loss
+            return (out, cls_hint), prompt_loss
         else:
             return (out,)
 
