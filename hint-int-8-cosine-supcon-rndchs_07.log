@@ -1,0 +1,203 @@
+************************************
+* STARTING TRIAL 1
+************************************
+Files already downloaded and verified
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+ortho penalty is on
+Prompt strategy:  int
+*****************************************
+====================== 1 =======================
+Incremental class: Old valid output dimension: 0
+Incremental class: New Valid output dimension: 10
+Optimizer is reset!
+*****************************************
+LR: 0.001
+Epoch:1/10
+ * Loss 1.422 | Train Acc 74.900
+LR: 0.001
+Epoch:2/10
+ * Loss 0.446 | Train Acc 91.587
+LR: 0.0009851093261547738
+Epoch:3/10
+ * Loss 0.262 | Train Acc 92.488
+LR: 0.0009408807689542254
+Epoch:4/10
+ * Loss 0.209 | Train Acc 93.109
+LR: 0.0008686315144381912
+Epoch:5/10
+ * Loss 0.184 | Train Acc 93.049
+LR: 0.0007705132427757892
+Epoch:6/10
+ * Loss 0.167 | Train Acc 93.409
+LR: 0.0006494480483301837
+Epoch:7/10
+ * Loss 0.152 | Train Acc 93.229
+LR: 0.0005090414157503712
+Epoch:8/10
+ * Loss 0.152 | Train Acc 93.369
+LR: 0.00035347484377925713
+Epoch:9/10
+ * Loss 0.139 | Train Acc 94.111
+LR: 0.00018738131458572452
+Epoch:10/10
+ * Loss 0.139 | Train Acc 93.830
+=> Saving class model to: outputs/cifar-100/10-task/hint-int-8-cosine-supcon-rndchs_07/models/repeat-1/task-1/
+=> Save Done
+validation split name: 1
+ * Val Acc 98.800, Total time 9.46
+====================== 2 =======================
+Incremental class: Old valid output dimension: 10
+Incremental class: New Valid output dimension: 20
+Optimizer is reset!
+*****************************************
+LR: 0.001
+Epoch:1/10
+ * Loss 1.346 | Train Acc 75.401
+LR: 0.001
+Epoch:2/10
+ * Loss 0.444 | Train Acc 89.483
+LR: 0.0009851093261547738
+Epoch:3/10
+ * Loss 0.307 | Train Acc 90.545
+LR: 0.0009408807689542254
+Epoch:4/10
+ * Loss 0.253 | Train Acc 91.126
+LR: 0.0008686315144381912
+Epoch:5/10
+ * Loss 0.225 | Train Acc 91.827
+LR: 0.0007705132427757892
+Epoch:6/10
+ * Loss 0.214 | Train Acc 91.346
+LR: 0.0006494480483301837
+Epoch:7/10
+ * Loss 0.202 | Train Acc 91.446
+LR: 0.0005090414157503712
+Epoch:8/10
+ * Loss 0.187 | Train Acc 92.348
+LR: 0.00035347484377925713
+Epoch:9/10
+ * Loss 0.182 | Train Acc 92.488
+LR: 0.00018738131458572452
+Epoch:10/10
+ * Loss 0.181 | Train Acc 92.929
+=> Saving class model to: outputs/cifar-100/10-task/hint-int-8-cosine-supcon-rndchs_07/models/repeat-1/task-2/
+=> Save Done
+validation split name: 1
+ * Val Acc 95.700, Total time 9.26
+validation split name: 2
+ * Val Acc 96.300, Total time 9.47
+====================== 3 =======================
+Incremental class: Old valid output dimension: 20
+Incremental class: New Valid output dimension: 30
+Optimizer is reset!
+*****************************************
+LR: 0.001
+Epoch:1/10
+ * Loss 0.968 | Train Acc 81.250
+LR: 0.001
+Epoch:2/10
+ * Loss 0.389 | Train Acc 90.044
+LR: 0.0009851093261547738
+Epoch:3/10
+ * Loss 0.292 | Train Acc 91.226
+LR: 0.0009408807689542254
+Epoch:4/10
+ * Loss 0.259 | Train Acc 91.506
+LR: 0.0008686315144381912
+Epoch:5/10
+ * Loss 0.233 | Train Acc 91.647
+LR: 0.0007705132427757892
+Epoch:6/10
+ * Loss 0.223 | Train Acc 91.667
+LR: 0.0006494480483301837
+Epoch:7/10
+ * Loss 0.203 | Train Acc 92.648
+LR: 0.0005090414157503712
+Epoch:8/10
+ * Loss 0.202 | Train Acc 92.368
+LR: 0.00035347484377925713
+Epoch:9/10
+ * Loss 0.190 | Train Acc 92.728
+LR: 0.00018738131458572452
+Epoch:10/10
+ * Loss 0.186 | Train Acc 93.049
+=> Saving class model to: outputs/cifar-100/10-task/hint-int-8-cosine-supcon-rndchs_07/models/repeat-1/task-3/
+=> Save Done
+validation split name: 1
+ * Val Acc 93.300, Total time 9.49
+validation split name: 2
+ * Val Acc 94.600, Total time 9.83
+validation split name: 3
+ * Val Acc 94.900, Total time 9.63
+====================== 4 =======================
+Incremental class: Old valid output dimension: 30
+Incremental class: New Valid output dimension: 40
+Optimizer is reset!
+*****************************************
+LR: 0.001
+Epoch:1/10
+ * Loss 1.080 | Train Acc 80.409
+LR: 0.001
+Epoch:2/10
+ * Loss 0.419 | Train Acc 91.366
+LR: 0.0009851093261547738
+Epoch:3/10
+ * Loss 0.307 | Train Acc 92.308
+LR: 0.0009408807689542254
+Epoch:4/10
+ * Loss 0.255 | Train Acc 92.668
+LR: 0.0008686315144381912
+Epoch:5/10
+ * Loss 0.234 | Train Acc 92.748
+LR: 0.0007705132427757892
+Epoch:6/10
+ * Loss 0.215 | Train Acc 92.909
+LR: 0.0006494480483301837
+Epoch:7/10
+ * Loss 0.207 | Train Acc 92.728
+LR: 0.0005090414157503712
+Epoch:8/10
+ * Loss 0.200 | Train Acc 92.949
+LR: 0.00035347484377925713
+Epoch:9/10
+ * Loss 0.196 | Train Acc 92.748
+LR: 0.00018738131458572452
+Epoch:10/10
+ * Loss 0.188 | Train Acc 93.750
+=> Saving class model to: outputs/cifar-100/10-task/hint-int-8-cosine-supcon-rndchs_07/models/repeat-1/task-4/
+=> Save Done
+validation split name: 1
+ * Val Acc 93.500, Total time 9.38
+validation split name: 2
+ * Val Acc 90.500, Total time 9.46
+validation split name: 3
+ * Val Acc 93.300, Total time 9.73
+validation split name: 4
+ * Val Acc 94.900, Total time 9.56
+====================== 5 =======================
+Incremental class: Old valid output dimension: 40
+Incremental class: New Valid output dimension: 50
+Optimizer is reset!
+*****************************************
+LR: 0.001
+Epoch:1/10
+ * Loss 1.167 | Train Acc 77.704
+LR: 0.001
+Epoch:2/10
+ * Loss 0.430 | Train Acc 89.984
+LR: 0.0009851093261547738
+Epoch:3/10
+ * Loss 0.310 | Train Acc 91.607
+LR: 0.0009408807689542254
+Epoch:4/10
+ * Loss 0.272 | Train Acc 91.346
+LR: 0.0008686315144381912
+Epoch:5/10
+ * Loss 0.243 | Train Acc 92.007
+LR: 0.0007705132427757892
+Epoch:6/10
+ * Loss 0.220 | Train Acc 92.408
+LR: 0.0006494480483301837
+Epoch:7/10
+ * Loss 0.203 | Train Acc 92.728
+LR: 0.0005090414157503712

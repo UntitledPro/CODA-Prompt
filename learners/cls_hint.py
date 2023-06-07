@@ -35,9 +35,7 @@ class Hint(NormalNN):
             dim=1,
             index=targets[:, None, None].repeat(1, 1, cls_hint.size(-1)),
         ).squeeze()
-        hint_logits = self.model.last(hint_emb)
-        logits = torch.cat([logits, hint_logits], dim=0)
-        targets = torch.cat([targets, targets], dim=0)
+        hint_logits = self.model.module.last(hint_emb)
 
         # contrastive loss
         # [B, emb_d]
@@ -52,17 +50,22 @@ class Hint(NormalNN):
             torch.zeros_like(sim_mat).scatter_(1, targets[:, None], 1).bool()
         )
         sim_mat = sim_mat[~mask].view(B, -1)
-        loss_sim = sim_mat.mean()
+        loss_sim = sim_mat.abs_().mean()
 
         # ce with heuristic
+        # logits = torch.cat([logits, hint_logits], dim=0)
+        # targets = torch.cat([targets, targets], dim=0)
+        hint_logits = hint_logits[:, : self.valid_out_dim]
+        hint_logits[:, : self.last_valid_out_dim] = -float("inf")
         logits = logits[:, : self.valid_out_dim]
         logits[:, : self.last_valid_out_dim] = -float("inf")
         dw_cls = self.dw_k[-1 * torch.ones(targets.size()).long()]
         total_loss = self.criterion(logits, targets.long(), dw_cls)
+        hint_loss = self.criterion(hint_logits, targets.long(), dw_cls)
 
         # ce loss
         # print('prompt loss: ', prompt_loss.sum())
-        total_loss = total_loss + prompt_loss.sum() + loss_sim
+        total_loss = total_loss + prompt_loss.sum() + loss_sim + hint_loss
 
         # step
         self.optimizer.zero_grad()

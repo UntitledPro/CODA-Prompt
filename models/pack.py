@@ -69,7 +69,6 @@ class MatrixPrompt(nn.Module):
         int_e_value = None
         if idx in self.e_layers:
             e_valid = True
-            B, C = x_querry.shape
 
             g_p = getattr(self, 'g_cls')
             e_a = getattr(self, f'e_a_{idx}')
@@ -251,7 +250,7 @@ class IntPrompt(MatrixPrompt):
             qry_norm = nn.functional.normalize(a_querry, dim=2)
             # [B, (task_count + 1) * nb_pt]
             sim = torch.einsum('bkd,kd->bk', qry_norm, e_key_nrom)
-            sim, loss_sim = self.rewrite_sim(sim, train=train)
+            sim, _ = self.rewrite_sim(sim, train=train)
             # # TODO-ablation: using softmax for attention, damage accuracy
             # aq_k = nn.Softmax(dim=1)(aq_k * self.key_d ** -0.5)
             # weighted sum
@@ -286,8 +285,6 @@ class IntPrompt(MatrixPrompt):
                 loss = loss * self.ortho_mu
             else:
                 loss = 0
-
-            loss += loss_sim
         else:
             loss = 0
 
@@ -404,6 +401,7 @@ class TopDownZoo(nn.Module):
 
         prompt_loss = tensor(0.)
         cls_hint = tensor(0.)
+        glob_x = None
         B = x.size(0)
         if self.prompt is not None:
             'initialize class hint'
@@ -435,12 +433,12 @@ class TopDownZoo(nn.Module):
             out = self.last(out)
 
         'return cfg'
-        if self.prompt is not None and train:
-            return (out,), prompt_loss
-        elif self.prompt is not None and train and glob_x is not None:
+        if self.prompt is not None and train and glob_x is not None:
             return (out, cls_hint), prompt_loss
+        elif self.prompt is not None and train:
+            return out, prompt_loss
         else:
-            return (out,)
+            return out
 
 
 def vit_pt_td(out_dim, block_division=None, prompt_flag='None', prompt_param=None):

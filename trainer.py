@@ -239,7 +239,7 @@ class Trainer:
                 batch_size=self.batch_size,
                 shuffle=False,
                 drop_last=False,
-                num_workers=self.workers,
+                num_workers=int(self.workers),
             )
             model_save_dir: str = (
                 self.model_top_dir

@@ -7,7 +7,7 @@ DATASET=cifar-100
 OUTDIR=outputs/${DATASET}/10-task
 
 # hard coded inputs
-GPUID='0 2 3'
+GPUID='0 1 2 3 4 5 6'
 CONFIG_test=configs/test.yaml
 REPEAT=1
 OVERWRITE=1
@@ -24,11 +24,10 @@ mkdir -p $OUTDIR
 #    arg 2 = prompt length
 #    arg 3 = ortho penalty loss weight/ortho_mu
 nohup python -u run.py --config "$CONFIG_test" --gpuid $GPUID --repeat "$REPEAT" --overwrite "$OVERWRITE" \
-        --learner_type cls_hint --learner_name MatrixHint \
+        --learner_type cls_hint --learner_name IntHint \
         --prompt_param 100 8 0.1 \
-        --log_dir ${OUTDIR}/hint-8-cosine-supcon \
-        >hint-8-cosine-supcon.log 2>&1 &
-
+        --log_dir ${OUTDIR}/hint-int-8-cosine-supcon-rndchs_07 \
+        >hint-int-8-cosine-supcon-rndchs_07.log 2>&1 &
 
 # Matrix-P
 #
