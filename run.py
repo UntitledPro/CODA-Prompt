@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
+
 import os
 import sys
 import argparse
@@ -13,7 +14,7 @@ import numpy as np
 import yaml
 import random
 from trainer import Trainer
-from typing import Dict, Any, List, Union, Sequence
+from typing import Dict
 
 
 def set_random_seed(seed=1) -> None:
@@ -27,7 +28,7 @@ def set_random_seed(seed=1) -> None:
     torch.backends.cudnn.benchmark = False
 
 
-def create_args():
+def create_args() -> ArgumentParser:
     # This function prepares the variables shared across demo.py
     parser = argparse.ArgumentParser()
 
@@ -52,13 +53,16 @@ def create_args():
         help="The type (filename) of learner",
     )
     parser.add_argument(
-        "--learner_name", type=str, default="NormalNN", help="The class name of learner"
+        "--learner_name",
+        type=str,
+        default="NormalNN",
+        help="The class name of learner",
     )
     parser.add_argument(
         "--debug_mode",
         type=int,
         default=0,
-        metavar="N",
+        metavar="debug",
         help="activate learner specific settings for debug_mode",
     )
     parser.add_argument(
@@ -80,7 +84,10 @@ def create_args():
         help="Upper bound for oracle",
     )
     parser.add_argument(
-        "--upper_bound_flag", default=False, action="store_true", help="Upper bound"
+        "--upper_bound_flag",
+        default=False,
+        action="store_true",
+        help="Upper bound",
     )
     parser.add_argument(
         "--memory", type=int, default=0, help="size of memory for replay"
@@ -116,7 +123,7 @@ def create_args():
     return parser
 
 
-def get_args(argv) -> Namespace:
+def get_args(argv):
     parser: ArgumentParser = create_args()
     args: Namespace = parser.parse_args(argv)
     config: Dict = yaml.load(open(args.config, "r"), Loader=yaml.Loader)
@@ -142,8 +149,10 @@ class Logger(object):
 
 if __name__ == "__main__":
     args: Namespace = get_args(sys.argv[1:])
-
+    if args.debug_mode:
+        args.schedule = [2]
     # determinstic backend
+    set_random_seed(0)
     torch.backends.cudnn.deterministic = True
 
     # duplicate output stream to output file
@@ -174,7 +183,12 @@ if __name__ == "__main__":
                 for skey in save_keys:
                     if (not (mkey in global_only)) or (skey == "global"):
                         save_file: str = (
-                            args.log_dir + "/results-" + mkey + "/" + skey + ".yaml"
+                            args.log_dir
+                            + "/results-"
+                            + mkey
+                            + "/"
+                            + skey
+                            + ".yaml"
                         )
                         if os.path.exists(save_file):
                             with open(save_file, "r") as yaml_file:
@@ -198,12 +212,16 @@ if __name__ == "__main__":
                     if not (mkey in global_only):
                         avg_metrics[mkey]["pt"] = np.append(
                             avg_metrics[mkey]["pt"],
-                            np.zeros((max_task, max_task, args.repeat - start_r)),
+                            np.zeros(
+                                (max_task, max_task, args.repeat - start_r)
+                            ),
                             axis=-1,
                         )
                         avg_metrics[mkey]["pt-local"] = np.append(
                             avg_metrics[mkey]["pt-local"],
-                            np.zeros((max_task, max_task, args.repeat - start_r)),
+                            np.zeros(
+                                (max_task, max_task, args.repeat - start_r)
+                            ),
                             axis=-1,
                         )
 
@@ -217,7 +235,7 @@ if __name__ == "__main__":
 
         # set random seeds
         seed: int = r
-        set_random_seed(seed)
+        set_random_seed(seed + 1)
 
         # set up a trainer
         trainer = Trainer(args, seed, metric_keys, save_keys)
@@ -259,19 +277,27 @@ if __name__ == "__main__":
                             yaml_results["std"] = (
                                 result[:, :, : r + 1].std(axis=2).tolist()
                             )
-                        yaml_results["history"] = result[:, :, : r + 1].tolist()
+                        yaml_results["history"] = result[
+                            :, :, : r + 1
+                        ].tolist()
                     else:
-                        yaml_results["mean"] = result[:, : r + 1].mean(axis=1).tolist()
+                        yaml_results["mean"] = (
+                            result[:, : r + 1].mean(axis=1).tolist()
+                        )
                         if r > 1:
                             yaml_results["std"] = (
                                 result[:, : r + 1].std(axis=1).tolist()
                             )
                         yaml_results["history"] = result[:, : r + 1].tolist()
                     with open(save_file, "w") as yaml_file:
-                        yaml.dump(yaml_results, yaml_file, default_flow_style=False)
+                        yaml.dump(
+                            yaml_results, yaml_file, default_flow_style=False
+                        )
 
         # Print the summary so far
-        print("===Summary of experiment repeats:", r + 1, "/", args.repeat, "===")
+        print(
+            "===Summary of experiment repeats:", r + 1, "/", args.repeat, "==="
+        )
         for mkey in metric_keys:
             print(
                 mkey,

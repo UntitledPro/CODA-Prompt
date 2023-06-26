@@ -13,13 +13,14 @@
             "justMyCode": true,
             "args": [
                 "--config", "configs/test.yaml",
-                "--gpuid", "0", "1", "2", "3",
+                "--gpuid", "0", "1", "2", "3", "4", "5", "6",
                 "--repeat", "1",
                 "--overwrite", "1",
-                "--learner_type", "prompt",
-                "--learner_name", "IntPrompt",
-                "--prompt_param", "100", "8", "0.1",
-                "--log_dir", "outputs/CIFAR100/10-task/matrix-p-test",
+                "--learner_type", "verbose_hint",
+                "--learner_name", "CatHint",
+                "--prompt_param", "100", "10", "0.1",
+                "--log_dir", "outputs/test",
+                "--debug_mode", "1",
             ],
         }
     ]

@@ -4,7 +4,7 @@
 Files already downloaded and verified
 |-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
 ortho penalty is on
-Prompt strategy:  int
+Prompt strategy:  matrix
 *****************************************
 ====================== 1 =======================
 Incremental class: Old valid output dimension: 0
@@ -13,38 +13,38 @@ Optimizer is reset!
 *****************************************
 LR: 0.001
 Epoch:1/10
- * Loss 1.422 | Train Acc 74.900
+ * Loss 1.670 | Train Acc 77.604
 LR: 0.001
 Epoch:2/10
- * Loss 0.446 | Train Acc 91.587
+ * Loss 0.468 | Train Acc 92.608
 LR: 0.0009851093261547738
 Epoch:3/10
- * Loss 0.262 | Train Acc 92.488
+ * Loss 0.333 | Train Acc 92.989
 LR: 0.0009408807689542254
 Epoch:4/10
- * Loss 0.209 | Train Acc 93.109
+ * Loss 0.293 | Train Acc 93.690
 LR: 0.0008686315144381912
 Epoch:5/10
- * Loss 0.184 | Train Acc 93.049
+ * Loss 0.265 | Train Acc 94.050
 LR: 0.0007705132427757892
 Epoch:6/10
- * Loss 0.167 | Train Acc 93.409
+ * Loss 0.262 | Train Acc 93.590
 LR: 0.0006494480483301837
 Epoch:7/10
- * Loss 0.152 | Train Acc 93.229
+ * Loss 0.247 | Train Acc 94.010
 LR: 0.0005090414157503712
 Epoch:8/10
- * Loss 0.152 | Train Acc 93.369
+ * Loss 0.226 | Train Acc 94.611
 LR: 0.00035347484377925713
 Epoch:9/10
- * Loss 0.139 | Train Acc 94.111
+ * Loss 0.221 | Train Acc 94.431
 LR: 0.00018738131458572452
 Epoch:10/10
- * Loss 0.139 | Train Acc 93.830
-=> Saving class model to: outputs/cifar-100/10-task/hint-int-8-cosine-supcon-rndchs_07/models/repeat-1/task-1/
+ * Loss 0.228 | Train Acc 94.331
+=> Saving class model to: outputs/cifar-100/10-task/matrix-test/models/repeat-1/task-1/
 => Save Done
 validation split name: 1
- * Val Acc 98.800, Total time 9.46
+ * Val Acc 99.100, Total time 8.63
 ====================== 2 =======================
 Incremental class: Old valid output dimension: 10
 Incremental class: New Valid output dimension: 20
@@ -52,40 +52,40 @@ Optimizer is reset!
 *****************************************
 LR: 0.001
 Epoch:1/10
- * Loss 1.346 | Train Acc 75.401
+ * Loss 1.121 | Train Acc 83.794
 LR: 0.001
 Epoch:2/10
- * Loss 0.444 | Train Acc 89.483
+ * Loss 0.432 | Train Acc 91.526
 LR: 0.0009851093261547738
 Epoch:3/10
- * Loss 0.307 | Train Acc 90.545
+ * Loss 0.353 | Train Acc 92.167
 LR: 0.0009408807689542254
 Epoch:4/10
- * Loss 0.253 | Train Acc 91.126
+ * Loss 0.326 | Train Acc 92.428
 LR: 0.0008686315144381912
 Epoch:5/10
- * Loss 0.225 | Train Acc 91.827
+ * Loss 0.316 | Train Acc 92.288
 LR: 0.0007705132427757892
 Epoch:6/10
- * Loss 0.214 | Train Acc 91.346
+ * Loss 0.301 | Train Acc 92.788
 LR: 0.0006494480483301837
 Epoch:7/10
- * Loss 0.202 | Train Acc 91.446
+ * Loss 0.277 | Train Acc 93.329
 LR: 0.0005090414157503712
 Epoch:8/10
- * Loss 0.187 | Train Acc 92.348
+ * Loss 0.284 | Train Acc 93.109
 LR: 0.00035347484377925713
 Epoch:9/10
- * Loss 0.182 | Train Acc 92.488
+ * Loss 0.282 | Train Acc 92.748
 LR: 0.00018738131458572452
 Epoch:10/10
- * Loss 0.181 | Train Acc 92.929
-=> Saving class model to: outputs/cifar-100/10-task/hint-int-8-cosine-supcon-rndchs_07/models/repeat-1/task-2/
+ * Loss 0.261 | Train Acc 93.329
+=> Saving class model to: outputs/cifar-100/10-task/matrix-test/models/repeat-1/task-2/
 => Save Done
 validation split name: 1
- * Val Acc 95.700, Total time 9.26
+ * Val Acc 96.200, Total time 8.80
 validation split name: 2
- * Val Acc 96.300, Total time 9.47
+ * Val Acc 96.200, Total time 8.90
 ====================== 3 =======================
 Incremental class: Old valid output dimension: 20
 Incremental class: New Valid output dimension: 30
@@ -93,42 +93,42 @@ Optimizer is reset!
 *****************************************
 LR: 0.001
 Epoch:1/10
- * Loss 0.968 | Train Acc 81.250
+ * Loss 0.929 | Train Acc 84.736
 LR: 0.001
 Epoch:2/10
- * Loss 0.389 | Train Acc 90.044
+ * Loss 0.384 | Train Acc 91.146
 LR: 0.0009851093261547738
 Epoch:3/10
- * Loss 0.292 | Train Acc 91.226
+ * Loss 0.311 | Train Acc 92.869
 LR: 0.0009408807689542254
 Epoch:4/10
- * Loss 0.259 | Train Acc 91.506
+ * Loss 0.285 | Train Acc 92.788
 LR: 0.0008686315144381912
 Epoch:5/10
- * Loss 0.233 | Train Acc 91.647
+ * Loss 0.281 | Train Acc 93.169
 LR: 0.0007705132427757892
 Epoch:6/10
- * Loss 0.223 | Train Acc 91.667
+ * Loss 0.255 | Train Acc 93.650
 LR: 0.0006494480483301837
 Epoch:7/10
- * Loss 0.203 | Train Acc 92.648
+ * Loss 0.260 | Train Acc 93.149
 LR: 0.0005090414157503712
 Epoch:8/10
- * Loss 0.202 | Train Acc 92.368
+ * Loss 0.241 | Train Acc 93.870
 LR: 0.00035347484377925713
 Epoch:9/10
- * Loss 0.190 | Train Acc 92.728
+ * Loss 0.237 | Train Acc 93.830
 LR: 0.00018738131458572452
 Epoch:10/10
- * Loss 0.186 | Train Acc 93.049
-=> Saving class model to: outputs/cifar-100/10-task/hint-int-8-cosine-supcon-rndchs_07/models/repeat-1/task-3/
+ * Loss 0.230 | Train Acc 94.050
+=> Saving class model to: outputs/cifar-100/10-task/matrix-test/models/repeat-1/task-3/
 => Save Done
 validation split name: 1
- * Val Acc 93.300, Total time 9.49
+ * Val Acc 95.300, Total time 8.72
 validation split name: 2
- * Val Acc 94.600, Total time 9.83
+ * Val Acc 91.300, Total time 8.70
 validation split name: 3
- * Val Acc 94.900, Total time 9.63
+ * Val Acc 95.300, Total time 8.68
 ====================== 4 =======================
 Incremental class: Old valid output dimension: 30
 Incremental class: New Valid output dimension: 40
@@ -136,44 +136,44 @@ Optimizer is reset!
 *****************************************
 LR: 0.001
 Epoch:1/10
- * Loss 1.080 | Train Acc 80.409
+ * Loss 0.868 | Train Acc 86.839
 LR: 0.001
 Epoch:2/10
- * Loss 0.419 | Train Acc 91.366
+ * Loss 0.354 | Train Acc 92.768
 LR: 0.0009851093261547738
 Epoch:3/10
- * Loss 0.307 | Train Acc 92.308
+ * Loss 0.288 | Train Acc 94.010
 LR: 0.0009408807689542254
 Epoch:4/10
- * Loss 0.255 | Train Acc 92.668
+ * Loss 0.271 | Train Acc 93.810
 LR: 0.0008686315144381912
 Epoch:5/10
- * Loss 0.234 | Train Acc 92.748
+ * Loss 0.254 | Train Acc 93.810
 LR: 0.0007705132427757892
 Epoch:6/10
- * Loss 0.215 | Train Acc 92.909
+ * Loss 0.237 | Train Acc 93.770
 LR: 0.0006494480483301837
 Epoch:7/10
- * Loss 0.207 | Train Acc 92.728
+ * Loss 0.229 | Train Acc 93.990
 LR: 0.0005090414157503712
 Epoch:8/10
- * Loss 0.200 | Train Acc 92.949
+ * Loss 0.223 | Train Acc 94.551
 LR: 0.00035347484377925713
 Epoch:9/10
- * Loss 0.196 | Train Acc 92.748
+ * Loss 0.219 | Train Acc 94.131
 LR: 0.00018738131458572452
 Epoch:10/10
- * Loss 0.188 | Train Acc 93.750
-=> Saving class model to: outputs/cifar-100/10-task/hint-int-8-cosine-supcon-rndchs_07/models/repeat-1/task-4/
+ * Loss 0.213 | Train Acc 94.671
+=> Saving class model to: outputs/cifar-100/10-task/matrix-test/models/repeat-1/task-4/
 => Save Done
 validation split name: 1
- * Val Acc 93.500, Total time 9.38
+ * Val Acc 95.000, Total time 8.75
 validation split name: 2
- * Val Acc 90.500, Total time 9.46
+ * Val Acc 83.400, Total time 8.76
 validation split name: 3
- * Val Acc 93.300, Total time 9.73
+ * Val Acc 91.400, Total time 8.64
 validation split name: 4
- * Val Acc 94.900, Total time 9.56
+ * Val Acc 97.100, Total time 8.70
 ====================== 5 =======================
 Incremental class: Old valid output dimension: 40
 Incremental class: New Valid output dimension: 50
@@ -181,46 +181,46 @@ Optimizer is reset!
 *****************************************
 LR: 0.001
 Epoch:1/10
- * Loss 1.167 | Train Acc 77.704
+ * Loss 0.859 | Train Acc 85.156
 LR: 0.001
 Epoch:2/10
- * Loss 0.430 | Train Acc 89.984
+ * Loss 0.329 | Train Acc 92.708
 LR: 0.0009851093261547738
 Epoch:3/10
- * Loss 0.310 | Train Acc 91.607
+ * Loss 0.281 | Train Acc 93.369
 LR: 0.0009408807689542254
 Epoch:4/10
- * Loss 0.272 | Train Acc 91.346
+ * Loss 0.240 | Train Acc 93.750
 LR: 0.0008686315144381912
 Epoch:5/10
- * Loss 0.243 | Train Acc 92.007
+ * Loss 0.241 | Train Acc 94.171
 LR: 0.0007705132427757892
 Epoch:6/10
- * Loss 0.220 | Train Acc 92.408
+ * Loss 0.238 | Train Acc 93.790
 LR: 0.0006494480483301837
 Epoch:7/10
- * Loss 0.203 | Train Acc 92.728
+ * Loss 0.218 | Train Acc 94.351
 LR: 0.0005090414157503712
 Epoch:8/10
- * Loss 0.188 | Train Acc 93.429
+ * Loss 0.209 | Train Acc 94.371
 LR: 0.00035347484377925713
 Epoch:9/10
- * Loss 0.187 | Train Acc 92.608
+ * Loss 0.199 | Train Acc 94.892
 LR: 0.00018738131458572452
 Epoch:10/10
- * Loss 0.180 | Train Acc 93.089
-=> Saving class model to: outputs/cifar-100/10-task/hint-int-8-cosine-supcon-rndchs_07/models/repeat-1/task-5/
+ * Loss 0.184 | Train Acc 94.892
+=> Saving class model to: outputs/cifar-100/10-task/matrix-test/models/repeat-1/task-5/
 => Save Done
 validation split name: 1
- * Val Acc 93.000, Total time 9.72
+ * Val Acc 93.200, Total time 8.83
 validation split name: 2
- * Val Acc 86.200, Total time 9.24
+ * Val Acc 82.800, Total time 8.82
 validation split name: 3
- * Val Acc 90.100, Total time 9.45
+ * Val Acc 89.400, Total time 8.90
 validation split name: 4
- * Val Acc 91.500, Total time 9.49
+ * Val Acc 90.800, Total time 8.92
 validation split name: 5
- * Val Acc 93.400, Total time 9.55
+ * Val Acc 95.900, Total time 8.93
 ====================== 6 =======================
 Incremental class: Old valid output dimension: 50
 Incremental class: New Valid output dimension: 60
@@ -228,48 +228,48 @@ Optimizer is reset!
 *****************************************
 LR: 0.001
 Epoch:1/10
- * Loss 1.144 | Train Acc 79.107
+ * Loss 0.839 | Train Acc 84.555
 LR: 0.001
 Epoch:2/10
- * Loss 0.417 | Train Acc 89.724
+ * Loss 0.323 | Train Acc 91.887
 LR: 0.0009851093261547738
 Epoch:3/10
- * Loss 0.293 | Train Acc 90.104
+ * Loss 0.263 | Train Acc 92.728
 LR: 0.0009408807689542254
 Epoch:4/10
- * Loss 0.245 | Train Acc 90.925
+ * Loss 0.240 | Train Acc 93.249
 LR: 0.0008686315144381912
 Epoch:5/10
- * Loss 0.215 | Train Acc 91.026
+ * Loss 0.229 | Train Acc 93.389
 LR: 0.0007705132427757892
 Epoch:6/10
- * Loss 0.193 | Train Acc 91.727
+ * Loss 0.236 | Train Acc 92.869
 LR: 0.0006494480483301837
 Epoch:7/10
- * Loss 0.175 | Train Acc 92.047
+ * Loss 0.227 | Train Acc 93.189
 LR: 0.0005090414157503712
 Epoch:8/10
- * Loss 0.169 | Train Acc 92.288
+ * Loss 0.209 | Train Acc 93.930
 LR: 0.00035347484377925713
 Epoch:9/10
- * Loss 0.161 | Train Acc 92.588
+ * Loss 0.211 | Train Acc 93.550
 LR: 0.00018738131458572452
 Epoch:10/10
- * Loss 0.166 | Train Acc 91.546
-=> Saving class model to: outputs/cifar-100/10-task/hint-int-8-cosine-supcon-rndchs_07/models/repeat-1/task-6/
+ * Loss 0.212 | Train Acc 93.369
+=> Saving class model to: outputs/cifar-100/10-task/matrix-test/models/repeat-1/task-6/
 => Save Done
 validation split name: 1
- * Val Acc 91.900, Total time 9.61
+ * Val Acc 94.500, Total time 8.90
 validation split name: 2
- * Val Acc 87.400, Total time 9.84
+ * Val Acc 82.800, Total time 8.85
 validation split name: 3
- * Val Acc 88.300, Total time 9.45
+ * Val Acc 88.000, Total time 8.80
 validation split name: 4
- * Val Acc 88.800, Total time 10.08
+ * Val Acc 90.300, Total time 8.81
 validation split name: 5
- * Val Acc 90.800, Total time 9.74
+ * Val Acc 91.300, Total time 8.67
 validation split name: 6
- * Val Acc 85.000, Total time 9.62
+ * Val Acc 91.500, Total time 8.60
 ====================== 7 =======================
 Incremental class: Old valid output dimension: 60
 Incremental class: New Valid output dimension: 70
@@ -277,50 +277,50 @@ Optimizer is reset!
 *****************************************
 LR: 0.001
 Epoch:1/10
- * Loss 1.246 | Train Acc 78.345
+ * Loss 0.845 | Train Acc 83.914
 LR: 0.001
 Epoch:2/10
- * Loss 0.452 | Train Acc 89.303
+ * Loss 0.329 | Train Acc 91.787
 LR: 0.0009851093261547738
 Epoch:3/10
- * Loss 0.310 | Train Acc 90.425
+ * Loss 0.279 | Train Acc 92.608
 LR: 0.0009408807689542254
 Epoch:4/10
- * Loss 0.265 | Train Acc 90.605
+ * Loss 0.268 | Train Acc 91.807
 LR: 0.0008686315144381912
 Epoch:5/10
- * Loss 0.239 | Train Acc 91.506
+ * Loss 0.248 | Train Acc 92.688
 LR: 0.0007705132427757892
 Epoch:6/10
- * Loss 0.224 | Train Acc 91.166
+ * Loss 0.233 | Train Acc 93.730
 LR: 0.0006494480483301837
 Epoch:7/10
- * Loss 0.220 | Train Acc 91.146
+ * Loss 0.227 | Train Acc 93.329
 LR: 0.0005090414157503712
 Epoch:8/10
- * Loss 0.207 | Train Acc 91.747
+ * Loss 0.234 | Train Acc 93.009
 LR: 0.00035347484377925713
 Epoch:9/10
- * Loss 0.200 | Train Acc 91.787
+ * Loss 0.217 | Train Acc 93.650
 LR: 0.00018738131458572452
 Epoch:10/10
- * Loss 0.203 | Train Acc 91.567
-=> Saving class model to: outputs/cifar-100/10-task/hint-int-8-cosine-supcon-rndchs_07/models/repeat-1/task-7/
+ * Loss 0.220 | Train Acc 93.169
+=> Saving class model to: outputs/cifar-100/10-task/matrix-test/models/repeat-1/task-7/
 => Save Done
 validation split name: 1
- * Val Acc 91.800, Total time 9.93
+ * Val Acc 92.800, Total time 8.85
 validation split name: 2
- * Val Acc 83.400, Total time 9.59
+ * Val Acc 80.200, Total time 8.81
 validation split name: 3
- * Val Acc 87.900, Total time 9.73
+ * Val Acc 86.900, Total time 8.92
 validation split name: 4
- * Val Acc 88.700, Total time 9.78
+ * Val Acc 91.100, Total time 8.95
 validation split name: 5
- * Val Acc 90.500, Total time 9.93
+ * Val Acc 91.600, Total time 8.94
 validation split name: 6
- * Val Acc 83.100, Total time 9.75
+ * Val Acc 81.200, Total time 8.88
 validation split name: 7
- * Val Acc 85.600, Total time 9.60
+ * Val Acc 94.000, Total time 8.92
 ====================== 8 =======================
 Incremental class: Old valid output dimension: 70
 Incremental class: New Valid output dimension: 80
@@ -328,52 +328,52 @@ Optimizer is reset!
 *****************************************
 LR: 0.001
 Epoch:1/10
- * Loss 1.367 | Train Acc 80.028
+ * Loss 0.762 | Train Acc 86.579
 LR: 0.001
 Epoch:2/10
- * Loss 0.449 | Train Acc 90.304
+ * Loss 0.280 | Train Acc 92.768
 LR: 0.0009851093261547738
 Epoch:3/10
- * Loss 0.325 | Train Acc 91.667
+ * Loss 0.241 | Train Acc 93.530
 LR: 0.0009408807689542254
 Epoch:4/10
- * Loss 0.287 | Train Acc 91.506
+ * Loss 0.213 | Train Acc 94.010
 LR: 0.0008686315144381912
 Epoch:5/10
- * Loss 0.257 | Train Acc 92.348
+ * Loss 0.206 | Train Acc 94.050
 LR: 0.0007705132427757892
 Epoch:6/10
- * Loss 0.236 | Train Acc 92.428
+ * Loss 0.206 | Train Acc 94.211
 LR: 0.0006494480483301837
 Epoch:7/10
- * Loss 0.221 | Train Acc 92.508
+ * Loss 0.204 | Train Acc 94.451
 LR: 0.0005090414157503712
 Epoch:8/10
- * Loss 0.222 | Train Acc 91.867
+ * Loss 0.192 | Train Acc 94.631
 LR: 0.00035347484377925713
 Epoch:9/10
- * Loss 0.209 | Train Acc 92.528
+ * Loss 0.203 | Train Acc 93.990
 LR: 0.00018738131458572452
 Epoch:10/10
- * Loss 0.203 | Train Acc 92.869
-=> Saving class model to: outputs/cifar-100/10-task/hint-int-8-cosine-supcon-rndchs_07/models/repeat-1/task-8/
+ * Loss 0.184 | Train Acc 94.732
+=> Saving class model to: outputs/cifar-100/10-task/matrix-test/models/repeat-1/task-8/
 => Save Done
 validation split name: 1
- * Val Acc 91.200, Total time 9.84
+ * Val Acc 92.600, Total time 8.90
 validation split name: 2
- * Val Acc 82.900, Total time 9.60
+ * Val Acc 78.900, Total time 8.91
 validation split name: 3
- * Val Acc 85.400, Total time 9.65
+ * Val Acc 86.000, Total time 8.84
 validation split name: 4
- * Val Acc 87.400, Total time 9.64
+ * Val Acc 90.900, Total time 8.88
 validation split name: 5
- * Val Acc 90.300, Total time 9.69
+ * Val Acc 91.200, Total time 8.90
 validation split name: 6
- * Val Acc 81.000, Total time 9.85
+ * Val Acc 79.000, Total time 9.04
 validation split name: 7
- * Val Acc 83.800, Total time 9.70
+ * Val Acc 89.500, Total time 8.91
 validation split name: 8
- * Val Acc 89.300, Total time 10.07
+ * Val Acc 92.200, Total time 8.90
 ====================== 9 =======================
 Incremental class: Old valid output dimension: 80
 Incremental class: New Valid output dimension: 90
@@ -381,54 +381,54 @@ Optimizer is reset!
 *****************************************
 LR: 0.001
 Epoch:1/10
- * Loss 1.231 | Train Acc 82.091
+ * Loss 0.749 | Train Acc 86.779
 LR: 0.001
 Epoch:2/10
- * Loss 0.399 | Train Acc 91.947
+ * Loss 0.260 | Train Acc 93.570
 LR: 0.0009851093261547738
 Epoch:3/10
- * Loss 0.267 | Train Acc 93.009
+ * Loss 0.215 | Train Acc 94.111
 LR: 0.0009408807689542254
 Epoch:4/10
- * Loss 0.219 | Train Acc 93.209
+ * Loss 0.203 | Train Acc 94.331
 LR: 0.0008686315144381912
 Epoch:5/10
- * Loss 0.202 | Train Acc 93.249
+ * Loss 0.188 | Train Acc 94.712
 LR: 0.0007705132427757892
 Epoch:6/10
- * Loss 0.187 | Train Acc 93.149
+ * Loss 0.171 | Train Acc 95.152
 LR: 0.0006494480483301837
 Epoch:7/10
- * Loss 0.175 | Train Acc 93.289
+ * Loss 0.182 | Train Acc 94.732
 LR: 0.0005090414157503712
 Epoch:8/10
- * Loss 0.170 | Train Acc 93.690
+ * Loss 0.178 | Train Acc 95.012
 LR: 0.00035347484377925713
 Epoch:9/10
- * Loss 0.157 | Train Acc 94.391
+ * Loss 0.184 | Train Acc 94.371
 LR: 0.00018738131458572452
 Epoch:10/10
- * Loss 0.162 | Train Acc 93.710
-=> Saving class model to: outputs/cifar-100/10-task/hint-int-8-cosine-supcon-rndchs_07/models/repeat-1/task-9/
+ * Loss 0.158 | Train Acc 95.413
+=> Saving class model to: outputs/cifar-100/10-task/matrix-test/models/repeat-1/task-9/
 => Save Done
 validation split name: 1
- * Val Acc 89.800, Total time 9.58
+ * Val Acc 93.200, Total time 8.73
 validation split name: 2
- * Val Acc 81.500, Total time 9.95
+ * Val Acc 82.300, Total time 8.81
 validation split name: 3
- * Val Acc 87.000, Total time 9.80
+ * Val Acc 87.700, Total time 8.87
 validation split name: 4
- * Val Acc 88.300, Total time 9.79
+ * Val Acc 87.300, Total time 8.89
 validation split name: 5
- * Val Acc 88.200, Total time 9.65
+ * Val Acc 90.600, Total time 8.87
 validation split name: 6
- * Val Acc 82.100, Total time 9.79
+ * Val Acc 80.800, Total time 8.87
 validation split name: 7
- * Val Acc 82.700, Total time 9.83
+ * Val Acc 86.100, Total time 8.83
 validation split name: 8
- * Val Acc 87.400, Total time 10.02
+ * Val Acc 85.200, Total time 8.81
 validation split name: 9
- * Val Acc 92.800, Total time 9.54
+ * Val Acc 96.400, Total time 8.87
 ====================== 10 =======================
 Incremental class: Old valid output dimension: 90
 Incremental class: New Valid output dimension: 100
@@ -436,310 +436,310 @@ Optimizer is reset!
 *****************************************
 LR: 0.001
 Epoch:1/10
- * Loss 1.292 | Train Acc 83.313
+ * Loss 0.733 | Train Acc 88.562
 LR: 0.001
 Epoch:2/10
- * Loss 0.453 | Train Acc 93.450
+ * Loss 0.223 | Train Acc 95.232
 LR: 0.0009851093261547738
 Epoch:3/10
- * Loss 0.322 | Train Acc 93.730
+ * Loss 0.187 | Train Acc 95.192
 LR: 0.0009408807689542254
 Epoch:4/10
- * Loss 0.265 | Train Acc 94.531
+ * Loss 0.166 | Train Acc 95.713
 LR: 0.0008686315144381912
 Epoch:5/10
- * Loss 0.222 | Train Acc 94.651
+ * Loss 0.164 | Train Acc 95.673
 LR: 0.0007705132427757892
 Epoch:6/10
- * Loss 0.193 | Train Acc 94.591
+ * Loss 0.136 | Train Acc 96.334
 LR: 0.0006494480483301837
 Epoch:7/10
- * Loss 0.180 | Train Acc 94.792
+ * Loss 0.143 | Train Acc 95.994
 LR: 0.0005090414157503712
 Epoch:8/10
- * Loss 0.175 | Train Acc 94.411
+ * Loss 0.140 | Train Acc 96.074
 LR: 0.00035347484377925713
 Epoch:9/10
- * Loss 0.170 | Train Acc 94.511
+ * Loss 0.132 | Train Acc 96.234
 LR: 0.00018738131458572452
 Epoch:10/10
- * Loss 0.161 | Train Acc 95.333
-=> Saving class model to: outputs/cifar-100/10-task/hint-int-8-cosine-supcon-rndchs_07/models/repeat-1/task-10/
+ * Loss 0.145 | Train Acc 96.274
+=> Saving class model to: outputs/cifar-100/10-task/matrix-test/models/repeat-1/task-10/
 => Save Done
 validation split name: 1
- * Val Acc 89.400, Total time 9.99
+ * Val Acc 92.000, Total time 8.95
 validation split name: 2
- * Val Acc 80.800, Total time 9.74
+ * Val Acc 78.500, Total time 8.79
 validation split name: 3
- * Val Acc 86.600, Total time 9.92
+ * Val Acc 88.200, Total time 8.87
 validation split name: 4
- * Val Acc 85.200, Total time 9.71
+ * Val Acc 87.200, Total time 9.03
 validation split name: 5
- * Val Acc 85.700, Total time 9.93
+ * Val Acc 87.000, Total time 8.86
 validation split name: 6
- * Val Acc 77.100, Total time 10.34
+ * Val Acc 78.000, Total time 8.99
 validation split name: 7
- * Val Acc 82.200, Total time 10.06
+ * Val Acc 84.200, Total time 8.92
 validation split name: 8
- * Val Acc 81.800, Total time 10.10
+ * Val Acc 85.200, Total time 8.93
 validation split name: 9
- * Val Acc 91.500, Total time 9.95
+ * Val Acc 89.100, Total time 8.91
 validation split name: 10
- * Val Acc 87.800, Total time 10.07
+ * Val Acc 91.200, Total time 8.91
 |-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
 ortho penalty is on
-Prompt strategy:  int
+Prompt strategy:  matrix
 *****************************************
 Incremental class: Old valid output dimension: 0
 Incremental class: New Valid output dimension: 10
 => Load Done
 validation split name: 1
- * Val Acc 98.800, Total time 9.33
+ * Val Acc 99.100, Total time 8.82
 validation split name: 1
- * Val Acc 98.667, Total time 9.38
+ * Val Acc 99.000, Total time 8.79
 Incremental class: Old valid output dimension: 10
 Incremental class: New Valid output dimension: 20
 => Load Done
 validation split name: 1
- * Val Acc 95.700, Total time 9.37
+ * Val Acc 96.200, Total time 8.81
 validation split name: 2
- * Val Acc 96.300, Total time 9.43
+ * Val Acc 96.200, Total time 8.92
 validation split name: 1
- * Val Acc 98.667, Total time 9.35
+ * Val Acc 98.778, Total time 8.82
 validation split name: 2
- * Val Acc 98.667, Total time 9.40
+ * Val Acc 99.111, Total time 8.86
 Incremental class: Old valid output dimension: 20
 Incremental class: New Valid output dimension: 30
 => Load Done
 validation split name: 1
- * Val Acc 93.300, Total time 9.60
+ * Val Acc 95.300, Total time 8.91
 validation split name: 2
- * Val Acc 94.600, Total time 9.58
+ * Val Acc 91.300, Total time 8.85
 validation split name: 3
- * Val Acc 94.900, Total time 9.54
+ * Val Acc 95.300, Total time 8.91
 validation split name: 1
- * Val Acc 98.556, Total time 9.36
+ * Val Acc 98.111, Total time 8.91
 validation split name: 2
- * Val Acc 98.556, Total time 9.81
+ * Val Acc 98.778, Total time 8.98
 validation split name: 3
- * Val Acc 97.444, Total time 9.72
+ * Val Acc 98.000, Total time 8.97
 Incremental class: Old valid output dimension: 30
 Incremental class: New Valid output dimension: 40
 => Load Done
 validation split name: 1
- * Val Acc 93.500, Total time 9.41
+ * Val Acc 95.000, Total time 8.92
 validation split name: 2
- * Val Acc 90.500, Total time 9.60
+ * Val Acc 83.400, Total time 8.99
 validation split name: 3
- * Val Acc 93.300, Total time 9.68
+ * Val Acc 91.400, Total time 8.99
 validation split name: 4
- * Val Acc 94.900, Total time 9.38
+ * Val Acc 97.100, Total time 9.13
 validation split name: 1
- * Val Acc 98.333, Total time 9.73
+ * Val Acc 99.000, Total time 8.79
 validation split name: 2
- * Val Acc 98.556, Total time 9.50
+ * Val Acc 98.556, Total time 8.97
 validation split name: 3
- * Val Acc 97.333, Total time 9.51
+ * Val Acc 97.222, Total time 8.93
 validation split name: 4
- * Val Acc 98.778, Total time 9.55
+ * Val Acc 98.778, Total time 8.92
 Incremental class: Old valid output dimension: 40
 Incremental class: New Valid output dimension: 50
 => Load Done
 validation split name: 1
- * Val Acc 93.000, Total time 9.91
+ * Val Acc 93.200, Total time 8.89
 validation split name: 2
- * Val Acc 86.200, Total time 9.99
+ * Val Acc 82.800, Total time 9.03
 validation split name: 3
- * Val Acc 90.100, Total time 9.67
+ * Val Acc 89.400, Total time 9.06
 validation split name: 4
- * Val Acc 91.500, Total time 9.76
+ * Val Acc 90.800, Total time 9.07
 validation split name: 5
- * Val Acc 93.400, Total time 9.48
+ * Val Acc 95.900, Total time 8.94
 validation split name: 1
- * Val Acc 98.889, Total time 9.56
+ * Val Acc 98.444, Total time 8.90
 validation split name: 2
- * Val Acc 98.556, Total time 9.58
+ * Val Acc 98.889, Total time 8.86
 validation split name: 3
- * Val Acc 97.333, Total time 9.61
+ * Val Acc 97.667, Total time 9.01
 validation split name: 4
- * Val Acc 97.889, Total time 10.02
+ * Val Acc 98.111, Total time 9.05
 validation split name: 5
- * Val Acc 98.333, Total time 9.45
+ * Val Acc 98.667, Total time 8.85
 Incremental class: Old valid output dimension: 50
 Incremental class: New Valid output dimension: 60
 => Load Done
 validation split name: 1
- * Val Acc 91.900, Total time 9.74
+ * Val Acc 94.500, Total time 8.82
 validation split name: 2
- * Val Acc 87.400, Total time 10.28
+ * Val Acc 82.800, Total time 8.95
 validation split name: 3
- * Val Acc 88.300, Total time 9.60
+ * Val Acc 88.000, Total time 8.89
 validation split name: 4
- * Val Acc 88.800, Total time 9.97
+ * Val Acc 90.300, Total time 9.01
 validation split name: 5
- * Val Acc 90.800, Total time 9.84
+ * Val Acc 91.300, Total time 9.00
 validation split name: 6
- * Val Acc 85.000, Total time 9.66
+ * Val Acc 91.500, Total time 9.02
 validation split name: 1
- * Val Acc 98.667, Total time 9.57
+ * Val Acc 99.000, Total time 8.86
 validation split name: 2
- * Val Acc 98.111, Total time 9.65
+ * Val Acc 98.556, Total time 8.91
 validation split name: 3
- * Val Acc 97.222, Total time 9.76
+ * Val Acc 97.778, Total time 8.83
 validation split name: 4
- * Val Acc 97.778, Total time 9.70
+ * Val Acc 99.000, Total time 9.01
 validation split name: 5
- * Val Acc 97.667, Total time 9.63
+ * Val Acc 98.778, Total time 8.94
 validation split name: 6
- * Val Acc 98.111, Total time 9.67
+ * Val Acc 98.556, Total time 8.81
 Incremental class: Old valid output dimension: 60
 Incremental class: New Valid output dimension: 70
 => Load Done
 validation split name: 1
- * Val Acc 91.800, Total time 9.56
+ * Val Acc 92.800, Total time 8.89
 validation split name: 2
- * Val Acc 83.400, Total time 9.79
+ * Val Acc 80.200, Total time 8.93
 validation split name: 3
- * Val Acc 87.900, Total time 9.74
+ * Val Acc 86.900, Total time 8.85
 validation split name: 4
- * Val Acc 88.700, Total time 9.62
+ * Val Acc 91.100, Total time 9.06
 validation split name: 5
- * Val Acc 90.500, Total time 9.71
+ * Val Acc 91.600, Total time 8.96
 validation split name: 6
- * Val Acc 83.100, Total time 9.89
+ * Val Acc 81.200, Total time 8.96
 validation split name: 7
- * Val Acc 85.600, Total time 9.79
+ * Val Acc 94.000, Total time 8.97
 validation split name: 1
- * Val Acc 98.778, Total time 9.67
+ * Val Acc 98.222, Total time 8.84
 validation split name: 2
- * Val Acc 98.111, Total time 9.88
+ * Val Acc 98.556, Total time 8.96
 validation split name: 3
- * Val Acc 97.111, Total time 9.70
+ * Val Acc 97.444, Total time 8.97
 validation split name: 4
- * Val Acc 97.889, Total time 9.49
+ * Val Acc 98.333, Total time 8.84
 validation split name: 5
- * Val Acc 97.333, Total time 9.69
+ * Val Acc 97.778, Total time 8.78
 validation split name: 6
- * Val Acc 98.556, Total time 9.64
+ * Val Acc 98.111, Total time 8.86
 validation split name: 7
- * Val Acc 96.556, Total time 9.88
+ * Val Acc 97.778, Total time 9.01
 Incremental class: Old valid output dimension: 70
 Incremental class: New Valid output dimension: 80
 => Load Done
 validation split name: 1
- * Val Acc 91.200, Total time 10.14
+ * Val Acc 92.600, Total time 8.89
 validation split name: 2
- * Val Acc 82.900, Total time 9.75
+ * Val Acc 78.900, Total time 8.91
 validation split name: 3
- * Val Acc 85.400, Total time 9.88
+ * Val Acc 86.000, Total time 8.92
 validation split name: 4
- * Val Acc 87.400, Total time 10.11
+ * Val Acc 90.900, Total time 8.94
 validation split name: 5
- * Val Acc 90.300, Total time 9.88
+ * Val Acc 91.200, Total time 8.95
 validation split name: 6
- * Val Acc 81.000, Total time 9.71
+ * Val Acc 79.000, Total time 8.94
 validation split name: 7
- * Val Acc 83.800, Total time 9.99
+ * Val Acc 89.500, Total time 9.06
 validation split name: 8
- * Val Acc 89.300, Total time 9.72
+ * Val Acc 92.200, Total time 8.93
 validation split name: 1
- * Val Acc 98.667, Total time 9.72
+ * Val Acc 98.444, Total time 8.84
 validation split name: 2
- * Val Acc 98.222, Total time 9.90
+ * Val Acc 98.889, Total time 9.19
 validation split name: 3
- * Val Acc 97.111, Total time 9.92
+ * Val Acc 97.889, Total time 9.00
 validation split name: 4
- * Val Acc 98.000, Total time 9.88
+ * Val Acc 98.444, Total time 8.88
 validation split name: 5
- * Val Acc 97.556, Total time 9.70
+ * Val Acc 97.667, Total time 8.86
 validation split name: 6
- * Val Acc 98.778, Total time 9.62
+ * Val Acc 98.333, Total time 8.85
 validation split name: 7
- * Val Acc 96.444, Total time 9.60
+ * Val Acc 97.556, Total time 8.98
 validation split name: 8
- * Val Acc 97.667, Total time 9.62
+ * Val Acc 98.556, Total time 8.89
 Incremental class: Old valid output dimension: 80
 Incremental class: New Valid output dimension: 90
 => Load Done
 validation split name: 1
- * Val Acc 89.800, Total time 9.46
+ * Val Acc 93.200, Total time 8.89
 validation split name: 2
- * Val Acc 81.500, Total time 9.86
+ * Val Acc 82.300, Total time 8.93
 validation split name: 3
- * Val Acc 87.000, Total time 9.91
+ * Val Acc 87.700, Total time 9.09
 validation split name: 4
- * Val Acc 88.300, Total time 9.87
+ * Val Acc 87.300, Total time 8.92
 validation split name: 5
- * Val Acc 88.200, Total time 9.87
+ * Val Acc 90.600, Total time 8.90
 validation split name: 6
- * Val Acc 82.100, Total time 10.34
+ * Val Acc 80.800, Total time 9.15
 validation split name: 7
- * Val Acc 82.700, Total time 9.60
+ * Val Acc 86.100, Total time 8.94
 validation split name: 8
- * Val Acc 87.400, Total time 9.96
+ * Val Acc 85.200, Total time 9.05
 validation split name: 9
- * Val Acc 92.800, Total time 9.70
+ * Val Acc 96.400, Total time 8.90
 validation split name: 1
- * Val Acc 98.889, Total time 9.70
+ * Val Acc 98.667, Total time 8.88
 validation split name: 2
- * Val Acc 98.222, Total time 10.05
+ * Val Acc 98.556, Total time 8.93
 validation split name: 3
- * Val Acc 97.222, Total time 9.91
+ * Val Acc 97.444, Total time 8.96
 validation split name: 4
- * Val Acc 98.000, Total time 9.72
+ * Val Acc 98.222, Total time 8.93
 validation split name: 5
- * Val Acc 97.667, Total time 9.85
+ * Val Acc 97.556, Total time 8.85
 validation split name: 6
- * Val Acc 98.444, Total time 9.59
+ * Val Acc 98.889, Total time 8.94
 validation split name: 7
- * Val Acc 96.222, Total time 9.90
+ * Val Acc 97.333, Total time 9.03
 validation split name: 8
- * Val Acc 97.889, Total time 9.68
+ * Val Acc 98.111, Total time 8.93
 validation split name: 9
- * Val Acc 98.556, Total time 10.17
+ * Val Acc 99.444, Total time 8.96
 Incremental class: Old valid output dimension: 90
 Incremental class: New Valid output dimension: 100
 => Load Done
 validation split name: 1
- * Val Acc 89.400, Total time 9.78
+ * Val Acc 92.000, Total time 8.88
 validation split name: 2
- * Val Acc 80.800, Total time 9.74
+ * Val Acc 78.500, Total time 8.92
 validation split name: 3
- * Val Acc 86.600, Total time 9.87
+ * Val Acc 88.200, Total time 8.89
 validation split name: 4
- * Val Acc 85.200, Total time 9.87
+ * Val Acc 87.200, Total time 9.08
 validation split name: 5
- * Val Acc 85.700, Total time 9.86
+ * Val Acc 87.000, Total time 9.08
 validation split name: 6
- * Val Acc 77.100, Total time 9.78
+ * Val Acc 78.000, Total time 8.99
 validation split name: 7
- * Val Acc 82.200, Total time 9.74
+ * Val Acc 84.200, Total time 8.90
 validation split name: 8
- * Val Acc 81.800, Total time 10.15
+ * Val Acc 85.200, Total time 9.07
 validation split name: 9
- * Val Acc 91.500, Total time 9.96
+ * Val Acc 89.100, Total time 8.81
 validation split name: 10
- * Val Acc 87.800, Total time 9.89
+ * Val Acc 91.200, Total time 8.93
 validation split name: 1
- * Val Acc 98.556, Total time 9.52
+ * Val Acc 98.333, Total time 8.91
 validation split name: 2
- * Val Acc 98.333, Total time 10.19
+ * Val Acc 98.333, Total time 8.90
 validation split name: 3
- * Val Acc 97.111, Total time 9.79
+ * Val Acc 98.000, Total time 8.94
 validation split name: 4
- * Val Acc 98.000, Total time 9.92
+ * Val Acc 98.667, Total time 8.98
 validation split name: 5
- * Val Acc 97.778, Total time 9.80
+ * Val Acc 97.333, Total time 8.79
 validation split name: 6
- * Val Acc 98.556, Total time 10.00
+ * Val Acc 98.778, Total time 8.86
 validation split name: 7
- * Val Acc 96.444, Total time 9.90
+ * Val Acc 97.000, Total time 8.98
 validation split name: 8
- * Val Acc 97.889, Total time 9.73
+ * Val Acc 98.889, Total time 8.95
 validation split name: 9
- * Val Acc 98.444, Total time 10.04
+ * Val Acc 99.444, Total time 8.97
 validation split name: 10
- * Val Acc 98.333, Total time 9.68
+ * Val Acc 99.000, Total time 8.84
 ===Summary of experiment repeats: 1 / 1 ===
-acc  | mean: 84.80999999999999 std: 0.0
-time  | mean: 0.7928711249278142 std: 0.0
+acc  | mean: 86.06000000000002 std: 0.0
+time  | mean: 0.6732233282847282 std: 0.0

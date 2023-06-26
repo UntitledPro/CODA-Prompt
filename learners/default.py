@@ -1,5 +1,5 @@
 from __future__ import print_function
-from typing import Callable, Any, Dict, List, Union, Sequence
+from typing import Callable, Any, Dict
 import torch
 import torch.nn as nn
 import models

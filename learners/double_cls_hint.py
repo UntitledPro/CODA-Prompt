@@ -6,7 +6,7 @@ from torch.nn import functional as F
 from utils.schedulers import CosineSchedule
 
 
-class Hint(NormalNN):
+class VHint(NormalNN):
     """add global class hints, update by targets
     model output: (logits, glob_hints), prompt_loss
 
@@ -14,7 +14,7 @@ class Hint(NormalNN):
 
     def __init__(self, learner_config):
         self.prompt_param = learner_config["prompt_param"]
-        super(Hint, self).__init__(learner_config)
+        super(VHint, self).__init__(learner_config)
 
     def update_model(self, inputs, targets):
         """compute three kind of loss:
@@ -25,7 +25,7 @@ class Hint(NormalNN):
         """
         # logits
         B = inputs.size(0)
-        o, prompt_loss = self.model(inputs, train=True)
+        o, prompt_loss = self.model(inputs, train=True, targets=targets)
         logits, cls_hint = o
 
         # hint loss
@@ -65,8 +65,9 @@ class Hint(NormalNN):
 
         # ce loss
         # print('prompt loss: ', prompt_loss.sum())
-        total_loss = total_loss + prompt_loss.sum() \
-            + loss_sim / 2 + hint_loss / 2
+        total_loss = (
+            total_loss + prompt_loss.mean() + loss_sim / 2 + hint_loss
+        )
 
         # step
         self.optimizer.zero_grad()
@@ -136,7 +137,7 @@ class Hint(NormalNN):
         return self
 
 
-class IntHint(Hint):
+class IntHint(VHint):
     def create_model(self):
         cfg = self.config
         model = models.__dict__[cfg["model_type"]].__dict__[cfg["model_name"]](
@@ -147,7 +148,7 @@ class IntHint(Hint):
         return model
 
 
-class MatrixHint(Hint):
+class MatrixHint(VHint):
     def create_model(self):
         cfg = self.config
         model = models.__dict__[cfg["model_type"]].__dict__[cfg["model_name"]](
@@ -158,7 +159,7 @@ class MatrixHint(Hint):
         return model
 
 
-class CatHint(Hint):
+class CatHint(VHint):
     def create_model(self):
         cfg = self.config
         model = models.__dict__[cfg["model_type"]].__dict__[cfg["model_name"]](
@@ -169,7 +170,7 @@ class CatHint(Hint):
         return model
 
 
-class ProjHint(Hint):
+class ProjHint(VHint):
     def create_model(self):
         cfg = self.config
         model = models.__dict__[cfg["model_type"]].__dict__[cfg["model_name"]](

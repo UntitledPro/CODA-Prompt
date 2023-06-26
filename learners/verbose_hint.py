@@ -1,20 +1,20 @@
 from __future__ import print_function
 import torch
+from torch import nn
 import models
 from .default import NormalNN
 from torch.nn import functional as F
 from utils.schedulers import CosineSchedule
 
 
-class Hint(NormalNN):
+class VHint(NormalNN):
     """add global class hints, update by targets
     model output: (logits, glob_hints), prompt_loss
 
     """
-
     def __init__(self, learner_config):
         self.prompt_param = learner_config["prompt_param"]
-        super(Hint, self).__init__(learner_config)
+        super(VHint, self).__init__(learner_config)
 
     def update_model(self, inputs, targets):
         """compute three kind of loss:
@@ -25,7 +25,7 @@ class Hint(NormalNN):
         """
         # logits
         B = inputs.size(0)
-        o, prompt_loss = self.model(inputs, train=True)
+        o, prompt_loss = self.model(inputs, train=True, targets=targets)
         logits, cls_hint = o
 
         # hint loss
@@ -60,13 +60,12 @@ class Hint(NormalNN):
         logits = logits[:, : self.valid_out_dim]
         logits[:, : self.last_valid_out_dim] = -float("inf")
         dw_cls = self.dw_k[-1 * torch.ones(targets.size()).long()]
-        total_loss = self.criterion(logits, targets.long(), dw_cls)
+        cls_loss = self.criterion(logits, targets.long(), dw_cls)
         hint_loss = self.criterion(hint_logits, targets.long(), dw_cls)
 
         # ce loss
         # print('prompt loss: ', prompt_loss.sum())
-        total_loss = total_loss + prompt_loss.sum() \
-            + loss_sim / 2 + hint_loss / 2
+        total_loss = cls_loss + prompt_loss.mean() + (loss_sim + hint_loss) / 3
 
         # step
         self.optimizer.zero_grad()
@@ -128,7 +127,7 @@ class Hint(NormalNN):
 
         # Multi-GPU
         if len(self.config["gpuid"]) > 1:
-            self.model = torch.nn.DataParallel(
+            self.model = torch.nn.parallel.DataParallel(
                 self.model,
                 device_ids=self.config["gpuid"],
                 output_device=self.config["gpuid"][0],
@@ -136,7 +135,7 @@ class Hint(NormalNN):
         return self
 
 
-class IntHint(Hint):
+class IntHint(VHint):
     def create_model(self):
         cfg = self.config
         model = models.__dict__[cfg["model_type"]].__dict__[cfg["model_name"]](
@@ -147,7 +146,7 @@ class IntHint(Hint):
         return model
 
 
-class MatrixHint(Hint):
+class MatrixHint(VHint):
     def create_model(self):
         cfg = self.config
         model = models.__dict__[cfg["model_type"]].__dict__[cfg["model_name"]](
@@ -158,7 +157,7 @@ class MatrixHint(Hint):
         return model
 
 
-class CatHint(Hint):
+class CatHint(VHint):
     def create_model(self):
         cfg = self.config
         model = models.__dict__[cfg["model_type"]].__dict__[cfg["model_name"]](
@@ -169,7 +168,7 @@ class CatHint(Hint):
         return model
 
 
-class ProjHint(Hint):
+class ProjHint(VHint):
     def create_model(self):
         cfg = self.config
         model = models.__dict__[cfg["model_type"]].__dict__[cfg["model_name"]](
